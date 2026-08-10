@@ -1,0 +1,1557 @@
+:root {
+    --ksp-green: #8ada31;
+    --ksp-orange: #f39c12;
+    --space-bg: #0b0f19;
+    --panel-bg: rgba(20, 30, 45, 0.9);
+    --text-main: #e0e0e0;
+    --ksp-blue: #3498db;
+	--ksp-red: #e74c3c;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; font-weight: bold; }
+
+body {
+    background-color: var(--space-bg);
+    color: var(--text-main);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.svg-orbit {
+    /* Skaliert die Strichstärke exakt wie die alten DIV-Orbits und die Transfer-Route */
+    stroke-width: calc(2px * var(--inv-scale, 1));
+}
+
+.svg-orbit-highlight {
+    stroke: var(--ksp-green) !important;
+}
+
+/* =========================================
+   Interplanetares Transfer Visual
+   ========================================= */
+#transfer-layer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    z-index: 45; /* Unter den Planeten (50+), über den Orbits */
+    pointer-events: none;
+    overflow: visible;
+}
+
+.transfer-path {
+    fill: none;
+    stroke: rgba(1, 255, 255, 0.8);
+    /* Nutzt nun die gleiche Skalierungs-Variable wie die Orbits */
+    stroke-width: calc(2px * var(--inv-scale, 1));
+    opacity: 0.7;
+}
+
+.transfer-rocket {
+    position: absolute;
+    width: 19px;
+    height: 8px;
+    z-index: 46;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform-origin: center center;
+	background-image: url('textures/Rocket.png');
+	background-size: 19px 8px;
+	will-change: background-position, background-size;
+}
+
+#rocket-card {
+    border: 2px solid var(--ksp-green);
+    margin-bottom: 15px; 
+    overflow: hidden; /* Schneidet alles exakt passend an der Rahmenkante ab */
+    padding: 0; /* Padding muss in den inneren Container verschoben werden */
+}
+
+#launchpad-label {
+    background-color: var(--ksp-green);
+    color: #111;
+    padding: 3px 0;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#rocket-content {
+    padding: 15px; /* Passe diesen Wert an dein ursprüngliches #rocket-card Padding an */
+}
+
+.resource-icon {
+    height: 1.1em;
+    width: 1.1em;
+    vertical-align: middle;
+    margin-top: -0.15em; 
+    display: inline-block;
+    object-fit: contain;
+}
+
+#top-bar {
+    background: #000;
+    border-bottom: 2px solid #333;
+    padding: 15px 30px;
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    justify-content: space-between;
+    font-size: 1.2rem;
+    z-index: 10;
+}
+
+.resource-box {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+	width: 100%;
+}
+
+.label {
+    margin-right: auto;
+}
+
+.text-blue { color: var(--ksp-blue) !important; }
+.text-green { color: var(--ksp-green) !important; }
+.text-orange { color: var(--ksp-orange) !important; }
+.currency { color: #888 !important; }
+
+#game-container {
+    display: block;
+    flex: 1;
+    position: relative;
+    height: calc(100vh - 80px);
+}
+
+#solar-system-map {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--space-bg);
+    background-image: url('textures/Star_Background_Square_Repeatable.png');
+    background-repeat: repeat;
+    background-position: center center;
+    height: 100%;
+    z-index: 1;
+    overflow: hidden;
+    cursor: grab;
+	will-change: background-position, background-size;	
+}
+
+#solar-system-map:active {
+    cursor: grabbing;   
+}
+
+.sun {
+    width: 60px;
+    height: 60px;
+    background-image: url('textures/kerbol_Stylized_Transparent.png');
+	background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: 50%;
+    box-shadow: 0 0 40px #f18e0f;
+    position: absolute;
+    cursor: pointer;
+    transition: box-shadow 0.3s;
+}
+
+#kerbol:hover {
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.8);
+}
+
+/* Der Wrapper übernimmt Position und Dimensionen */
+.planet-wrapper {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none; /* Klicks an Kinder durchreichen */
+}
+
+/* Planet füllt den Wrapper komplett aus */
+.planet {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: box-shadow 0.2s, filter 0.2s;
+    pointer-events: auto; /* Klicks nur auf dem Planetenkörper erlauben */
+	background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* Filter greift jetzt nur noch auf den Körper, nicht auf Monde/Labels */
+.planet.locked {
+    filter: grayscale(100%) brightness(0.4);
+}
+
+#zoom-label {
+    color: var(--ksp-green);
+    font-size: 0.9rem;
+    font-weight: bold;
+    white-space: nowrap;
+    letter-spacing: 2px;
+    margin: 0;
+}
+
+#zoom-slider {
+    width: 100%;
+    accent-color: #333;
+    background: #222;
+    height: 6px;
+    border-radius: 3px;
+    cursor: pointer;
+    outline: none;
+}
+
+#map-content {
+    width: 100%;
+    height: 100%;
+    display: flex;          
+    align-items: center;    
+    justify-content: center;  
+    position: relative;
+    transform-origin: center center;
+}
+
+#leftPanel-title {
+	display: flex;
+	border-bottom: 2px solid var(--ksp-orange);
+	align-items: center;
+	justify-content: center;
+	padding-top: 7px;
+	padding-bottom: 13px;
+}
+
+#map-controls {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    height: 40px; 
+    padding: 21px 15px;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    z-index: 5;
+    pointer-events: auto;
+    box-sizing: border-box;
+    display: none; 
+    transition: right 0.2s ease;
+}
+
+#resource-display {
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #444;
+    padding: 12px 15px;
+    border-radius: 6px;
+	display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center; 
+    gap: 8px 4px;       
+	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+	min-width: 300px;
+}
+
+.resource-sum {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap; 
+}
+
+.resource-income {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    white-space: nowrap;
+}
+
+#btn-rnd {
+	height: 48px;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.1s;
+	box-sizing: border-box;
+}
+
+#btn-rnd:hover {
+    transform: scale(1.01);
+}
+
+#btn-rnd:active {
+    transform: scale(0.99);
+}
+
+/* 1. Linker Teil: Text-Bereich */
+#btn-text {
+    flex: 1;
+	height: 100%;
+    padding: 0 20px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid var(--ksp-blue);
+    border-radius: 6px; /* Standardmäßig komplett abgerundet */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    color: var(--ksp-blue);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+    box-sizing: border-box;
+    transition: background 0.1s;
+	white-space: nowrap;
+}
+
+#btn-rnd:hover #btn-text {
+    background: rgba(52, 152, 219, 0.15);
+}
+
+#btn-rnd:hover #rnd-indicator {
+    background: rgba(52, 152, 219, 0.15);
+}
+
+#btn-rnd:has(#rnd-indicator:not(.hidden)) #btn-text {
+    border-right: none;
+    border-radius: 6px 0 0 6px;
+}
+
+#rnd-indicator {
+    height: 100%;
+    width: 40px;
+	flex-shrink: 0;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid var(--ksp-blue);
+    border-radius: 0 6px 6px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ksp-blue);
+    font-size: 1.6rem;
+    font-weight: bold;
+    line-height: 1;
+    box-shadow: 5px 4px 15px rgba(0, 0, 0, 0.6);
+    box-sizing: border-box;
+}
+
+#rnd-indicator.hidden {
+    display: none;
+}
+
+
+.planet-hidden {
+    display: none;
+}
+
+/* Moho */
+#wrapper-moho { 
+    width: 22px; 
+    height: 22px; 
+    top: -11px; 
+}
+.planet-moho {
+    background-image: url('textures/Moho_Stylized_Transparent.png');
+	/* Invertierung der Container-Stauchung per JS-Variable. Hält den Planeten rund! */
+    transform: scaleX(var(--moho-inv-scale-x));
+}
+#planet-moho:hover { box-shadow: 0 0 25px rgba(255, 255, 255, 0.8); }
+
+/* Eve */
+#wrapper-eve {
+	width: 24px; 
+    height: 24px;
+	top: -12px;
+}
+.planet-eve {
+    background-image: url('textures/Eve_Stylized_Transparent.png');
+	box-shadow: 0 0 10px rgba(107, 60, 115, 0.8);
+}
+#planet-eve:hover { box-shadow: 0 0 25px rgba(255, 255, 255, 0.8); }
+
+#planet-eve:has(#planet-gilly:hover) {
+    box-shadow: 0 0 5px #2f9dff87;
+}
+
+/* Gilly */
+#wrapper-gilly {
+	width: 10px; 
+    height: 10px; 
+    top: -5px;
+}
+.planet-gilly {
+    background-image: url('textures/Gilly_Stylized_Transparent.png');
+}
+#planet-gilly:hover { box-shadow: 0 0 25px rgba(255, 255, 255, 0.8); }
+
+/* Kerbin */
+#wrapper-kerbin {
+	width: 28px;
+	height: 28px;
+	top: -14px;
+}
+.planet-kerbin {
+    background-image: url('textures/Kerbin_Stylized_Transparent.png');
+    box-shadow: 0 0 10px rgba(0, 150, 255, 0.5);
+}
+#planet-kerbin:hover {box-shadow: 0 0 25px rgba(255, 255, 255, 0.8); }
+
+#planet-kerbin:has(#planet-mun:hover) {
+    box-shadow: 0 0 5px #2f9dff87;
+}
+
+#planet-kerbin:has(#planet-minmus:hover) {
+    box-shadow: 0 0 5px #2f9dff87;
+}
+
+/* Mun */
+#wrapper-mun {
+	width: 14px; 
+    height: 14px; 
+	top: -7px;
+}
+.planet-mun {
+    background-image: url('textures/Mun_Stylized_Transparent.png');
+}
+#planet-mun:hover { box-shadow: 0 0 25px rgba(255, 255, 255, 0.8); }
+
+/* Minmus */
+#wrapper-minmus {
+	width: 10px; 
+    height: 10px; 
+    top: -5px;
+}
+.planet-minmus {
+    background-image: url('textures/Minmus_Stylized_Transparent.png');
+}
+#planet-minmus:hover { box-shadow: 0 0 25px rgba(255, 255, 255, 0.8); }
+
+/* Duna */
+#wrapper-duna { 
+    width: 22px; 
+    height: 22px; 
+    top: -11px; 
+}
+.planet-duna {
+    background-image: url('textures/Duna_Stylized_Transparent.png');
+    box-shadow: 0 0 5px rgba(203, 75, 22, 1);
+}
+#planet-duna:hover { box-shadow: 0 0 25px rgba(255, 255, 255, 0.8); }
+
+#planet-duna:has(#planet-ike:hover) {
+    box-shadow: 0 0 5px rgba(203, 75, 22, 1);
+}
+
+/* Ike */
+#wrapper-ike { 
+    width: 12px; 
+    height: 12px; 
+    top: -6px; 
+}
+.planet-ike {
+    background-image: url('textures/Ike_Stylized_Transparent.png');
+}
+#planet-ike:hover { box-shadow: 0 0 25px rgba(255, 255, 255, 0.8); }
+
+/* Dres */
+#wrapper-dres { 
+    width: 22px; 
+    height: 22px; 
+    top: -11px; 
+}
+.planet-dres {
+    background-image: url('textures/Dres_Stylized_Transparent.png');
+	/* Invertierung der Container-Stauchung per JS-Variable. Hält den Planeten rund! */
+    transform: scaleX(var(--dres-inv-scale-x));
+}
+#planet-dres:hover { box-shadow: 0 0 25px rgba(255, 255, 255, 0.8); }
+
+
+/* Jool */
+#wrapper-jool {
+	width: 44px; 
+    height: 44px;
+	top: -22px;	
+}
+.planet-jool {
+    background-image: url('textures/Jool_Stylized_Transparent.png');
+    box-shadow: 0 0 5px rgba(100, 255, 100, 1);
+}
+#planet-jool:hover { box-shadow: 0 0 25px rgba(255, 255, 255, 0.8); }
+
+#planet-jool:has(#planet-laythe:hover) {
+    box-shadow: 0 0 20px rgba(100, 255, 100, 0.5);
+}
+
+#planet-jool:has(#planet-vall:hover) {
+    box-shadow: 0 0 20px rgba(100, 255, 100, 0.5);
+}
+
+#planet-jool:has(#planet-tylo:hover) {
+    box-shadow: 0 0 20px rgba(100, 255, 100, 0.5);
+}
+
+#planet-jool:has(#planet-bop:hover) {
+    box-shadow: 0 0 20px rgba(100, 255, 100, 0.5);
+}
+
+#planet-jool:has(#planet-pol:hover) {
+    box-shadow: 0 0 20px rgba(100, 255, 100, 0.5);
+}
+
+/* Laythe */
+#wrapper-laythe {
+	width: 12px; 
+    height: 12px; 
+	top: -6px;
+}
+.planet-laythe {
+    background-image: url('textures/Laythe_Stylized_Transparent.png');
+	box-shadow: 0 0 4px rgba(18, 86, 130, 1);
+}
+#planet-laythe:hover { box-shadow: 0 0 25px rgba(255, 255, 255, 0.8); }
+
+/* Vall */
+#wrapper-vall {
+	width: 10px; 
+    height: 10px; 
+	top: -5px;
+}
+.planet-vall {
+    background-image: url('textures/Vall_Stylized_Transparent.png');
+}
+#planet-vall:hover { box-shadow: 0 0 25px rgba(255, 255, 255, 0.8); }
+
+/* Tylo */
+#wrapper-tylo {
+	width: 14px; 
+    height: 14px; 
+	top: -7px;
+}
+.planet-tylo {
+    background-image: url('textures/Tylo_Stylized_Transparent.png');
+}
+#planet-tylo:hover { box-shadow: 0 0 25px rgba(255, 255, 255, 0.8); }
+
+/* Bop */
+#wrapper-bop {
+	width: 8px; 
+    height: 8px; 
+	top: -4px;
+}
+.planet-bop {
+    background-image: url('textures/Bop_Stylized_Transparent.png');
+}
+#planet-bop:hover { box-shadow: 0 0 25px rgba(255, 255, 255, 0.8); }
+
+/* Pol */
+#wrapper-pol {
+	width: 6px; 
+    height: 6px; 
+	top: -3px;
+}
+.planet-pol {
+    background-image: url('textures/Pol_Stylized_Transparent.png');
+	/* Invertierung der Container-Stauchung per JS-Variable. Hält den Planeten rund! */
+    transform: scaleX(var(--pol-inv-scale-x));
+}
+#planet-pol:hover { box-shadow: 0 0 25px rgba(255, 255, 255, 0.8); }
+
+/* Eeloo */
+#wrapper-eeloo { 
+    width: 18px; 
+    height: 18px; 
+    top: -9px; 
+}
+.planet-eeloo {
+    background-image: url('textures/Eeloo_Stylized_Transparent.png');
+    /* Invertierung der Container-Stauchung per JS-Variable. Hält den Planeten rund! */
+    transform: scaleX(var(--eeloo-inv-scale-x));
+}
+#planet-eeloo:hover { box-shadow: 0 0 25px rgba(255, 255, 255, 0.8); }
+
+#action-panel, 
+.side-panel {
+    width: 345px;
+    min-width: 345px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: absolute;
+    z-index: 10;
+    overflow: hidden;
+    
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #444;
+    border-radius: 6px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+    
+    margin-top: 20px;
+	margin-bottom: 20px;
+	margin-right: 10px;
+	margin-left: 10px;
+    height: calc(100% - 40px);
+    padding: 14px;
+    box-sizing: border-box;
+}
+
+#mission-panel {
+    left: 0;
+    top: 0;
+}
+
+#action-panel {
+    right: 0;
+    top: 0;
+}
+
+.hidden { display: none !important; }
+h2 { padding-bottom: 10px; margin-bottom: 10px; }
+
+.action-card {
+    background: rgba(26, 26, 26, 0.65);
+    padding: 15px;
+    border-radius: 8px;
+    border: 2px solid #444;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.action-card h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.1rem;
+    color: var(--text-main);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 8px;
+}
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 6px 12px;
+    margin: 12px 0;
+    font-size: 0.85rem;
+    color: #bbb;
+    align-items: center;
+}
+
+.stat-val {
+    text-align: right;
+    font-weight: bold;
+    color: #fff;
+}
+
+.ksp-button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    background: #333;
+    color: var(--text-main);
+    border: 2px solid #555;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.ksp-button:hover { background: #444; }
+.ksp-button:active { transform: scale(0.98); }
+.btn-green { border-color: var(--ksp-green); background: rgba(138, 218, 49, 0.1); }
+.btn-green:hover { background: rgba(138, 218, 49, 0.25); }
+.btn-orange { border-color: var(--ksp-orange); background: rgba(243, 156, 18, 0.1); }
+.btn-orange:hover { border-color: var(--ksp-orange); background: rgba(243, 156, 18, 0.25); }
+.btn-red { border-color: #e74c3c; background: rgba(231, 76, 60, 0.1); }
+.btn-red:hover { background: rgba(231, 76, 60, 0.25); }
+.btn-blue { border-color: var(--ksp-blue); background: rgba(52, 152, 219, 0.1); }
+.btn-blue:hover { background: rgba(52, 152, 219, 0.25); }
+
+.planet-label {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%) scale(var(--inv-scale, 1));
+	transform-origin: top center;
+    font-size: 0.9rem;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.75);
+    padding: 3px 8px;
+    border-radius: 3px;
+    border: 1px solid #444;
+	margin-top: 6px;
+    white-space: nowrap;
+    pointer-events: none;
+}
+.sun-label { top: auto; bottom: -22px; transform-origin: bottom center;}
+
+.floating-number {
+    position: absolute;
+    top: -27px;
+    left: 50%;
+    transform-origin: bottom center;
+    color: var(--ksp-green);
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-shadow: 2px 2px 0px #000;
+    pointer-events: none;
+    animation: floatUpAndFade 0.8s ease-out forwards;
+    white-space: nowrap;
+    z-index: 100;
+}
+
+@keyframes floatUpAndFade {
+    0% { 
+        transform: translateX(-50%) translateY(0) scale(var(--inv-scale, 1)); 
+        opacity: 1; 
+    }
+    100% { 
+        transform: translateX(-50%) translateY(calc(-45px * var(--inv-scale, 1))) scale(var(--inv-scale, 1)); 
+        opacity: 0; 
+    }
+}
+
+.header-button { width: auto; margin-top: 0; padding: 6px 12px; font-size: 0.8rem; }
+
+.modal {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: var(--panel-bg);
+    border: 2px solid var(--ksp-blue);
+    padding: 30px;
+    width: 95vw;
+    height: 90vh;
+    max-width: none;
+    border-radius: 8px;
+    color: var(--text-main);
+	display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--ksp-blue);
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+.modal-header h2 { margin: 0; padding: 0; border-bottom: none; }
+
+.close-btn { background: transparent; color: var(--text-main); border: none; font-size: 1.5rem; cursor: pointer; }
+.close-btn:hover { color: #e74c3c; }
+
+.esc-menu-content { background: rgba(0, 0, 0, 0.8); border: 2px solid #444; width: 430px; max-width: 90%; height: auto;}
+.esc-menu-content .modal-header { border-bottom: none; margin-bottom: 0px; }
+
+.esc-separator {
+    width: 100%;
+    height: 2px;
+    background-color: #444; /* Passend zu den bestehenden Rahmen-Farben */
+    margin: 15px 0;
+}
+
+.esc-sliders {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    text-align: left;
+}
+
+.slider-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center; /* Zentriert Icon und Slider vertikal auf einer Linie */
+    gap: 15px;
+}
+
+.slider-icon {
+    width: 24px; /* Fixe Breite, passend zur Skalierung */
+    height: 24px; /* Fixe Höhe, sichert die exakt rechteckige Form */
+    object-fit: contain; /* Verhindert Verzerrungen */
+}
+
+.ksp-slider {
+    flex-grow: 1; /* Der Slider füllt den restlichen verfügbaren Platz aus */
+    accent-color: var(--text-main);
+    background: #222;
+    height: 6px;
+    border-radius: 3px;
+    cursor: pointer;
+    outline: none;
+}
+
+#economy-section {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+#missions-container,
+#economy-scroll-area {
+    overflow-y: auto;
+	flex: 1;
+    min-height: 0;
+}
+
+#economy-scroll-area {
+    flex: 1;
+    min-height: 0;
+}
+
+#missions-container::-webkit-scrollbar,
+#economy-scroll-area::-webkit-scrollbar {
+    width: 22px;
+}
+
+/* Unsichtbare Spur (Hintergrund des Scrollbalkens) */
+#missions-container::-webkit-scrollbar-track,
+#economy-scroll-area::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+	border-radius: 10px;
+    border: 8px solid transparent;
+    background-clip: padding-box;
+}
+
+/* Der sichtbare Scrollbalken */
+#missions-container::-webkit-scrollbar-thumb,
+#economy-scroll-area::-webkit-scrollbar-thumb {
+    background-color: #555; 
+    border-radius: 10px;
+    border: 8px solid transparent;
+    background-clip: padding-box;
+}
+
+#missions-container::-webkit-scrollbar-thumb:hover {
+	background: var(--ksp-orange);
+	border-radius: 10px;
+    border: 8px solid transparent;
+    background-clip: padding-box;
+}
+
+#economy-scroll-area::-webkit-scrollbar-thumb:hover {
+	background: var(--ksp-green);
+	border-radius: 10px;
+    border: 8px solid transparent;
+    background-clip: padding-box;
+}
+
+.mission-progress-container {
+    background: #111;
+    border: 1px solid #444;
+    height: 18px;
+    position: relative;
+    margin-top: 12px;
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mission-progress-bar {
+    background: var(--ksp-orange);
+	position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    transition: width 0.2s ease-out;
+}
+
+.mission-progress-container.completed .mission-progress-bar {
+    background: var(--ksp-orange);
+}
+
+.mission-progress-text {
+    position: relative;
+    z-index: 2;
+    font-size: 0.75rem;
+    color: #fff;
+    text-shadow: 1px 1px 1px #000, -1px -1px 1px #000;
+}
+
+.disabled-buy {
+    background-color: #444 !important;
+    color: #888 !important;
+    cursor: not-allowed !important;
+    opacity: 0.7;
+    border: 2px solid #555;
+}
+
+.panel-header-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    border-bottom: 2px solid var(--ksp-green);
+    padding-bottom: 10px;
+}
+
+.panel-header-nav h2 {
+    border-bottom: none; 
+    padding-bottom: 0;
+    margin-bottom: 0;
+    text-align: center;
+    min-width: 120px;
+}
+
+.nav-arrow {
+    background: transparent;
+    color: var(--text-main);
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    transition: transform 0.1s, color 0.1s;
+}
+
+.nav-arrow:hover {
+    color: var(--ksp-green);
+    transform: scale(1.2);
+}
+
+#time-warp-container {
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #444;
+    padding: 8px 12px;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+    --warp-color: var(--ksp-green);
+    width: 190px;
+    overflow: hidden; /* WICHTIG: Schneidet den integrierten Balken an den unteren runden Ecken des Containers sauber ab */
+}
+
+/* --- Neue Regeln für den Prestige-Balken --- */
+#warp-progress-container.mission-progress-container {
+    width: calc(100% + 24px); /* Überbrückt das 12px Padding links und rechts des Parent-Containers */
+    margin-left: -12px;
+    margin-right: -12px;
+    margin-bottom: -8px; /* Überbrückt das 8px Padding unten des Parent-Containers */
+    margin-top: 4px;
+    border-radius: 0;
+    border: none;
+    border-top: 2px solid #444;
+    height: 28px; 
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+#warp-progress-bar {
+    background: var(--ksp-blue);
+    transition: background-color 0.2s, width 0.2s ease-out;
+}
+
+#warp-controls {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+}
+
+#mission-time {
+    font-size: 1rem;
+    font-weight: bold;
+	color: var(--warp-color);
+    letter-spacing: 2px;
+    border-top: 1px solid #444;
+    padding-top: 6px;
+    width: 100%;
+    text-align: center;
+	transition: color 0.3s;
+}
+
+#warp-label {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: var(--warp-color);
+    letter-spacing: 2px;
+	transition: color 0.3s;
+}
+
+#warp-triangles {
+    display: flex;
+    gap: 4px;
+}
+
+.warp-arrow {
+    font-size: 1.2rem;
+    color: #444; 
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.1s, transform 0.1s;
+}
+
+.warp-arrow:hover { transform: scale(1.2); }
+.warp-arrow.active {
+    color: var(--warp-color);
+    text-shadow: 0 0 5px var(--warp-color);
+	transition: color 0.3s, text-shadow 0.3s, transform 0.1s;
+}
+
+.paused *, .paused { animation-play-state: paused !important; }
+
+#solar-system-map.paused, 
+#solar-system-map.paused * {
+    animation-play-state: paused !important;
+}
+
+#missions-container::-webkit-scrollbar-thumb:hover {
+    background-color: var(--ksp-orange);
+    border-radius: 10px;
+    border: 8px solid transparent;
+    background-clip: padding-box;
+}
+
+#game-container:has(#action-panel:not(.hidden)) #top-ui-layer {
+    right: 370px;
+}
+
+#top-ui-layer {
+    position: absolute;
+    top: 20px;
+    left: 370px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    z-index: 5;
+    pointer-events: none;
+}
+
+#game-container:has(#action-panel:not(.hidden)) #map-controls {
+    right: 430px;
+}
+
+#top-ui-layer > * { pointer-events: auto; }
+
+
+/* --- TECH TREE CSS --- */
+.tech-tree-viewport {
+    position: relative;
+    width: 100%;
+    flex-grow: 1;
+    overflow: hidden;
+    cursor: grab;
+    border-radius: 8px;
+}
+
+.tech-tree-viewport:active {
+    cursor: grabbing;
+}
+
+.tech-tree-canvas {
+    display: grid;
+    grid-auto-columns: min-content; 
+    gap: 40px;
+    padding: 40px;
+    position: absolute;
+    width: max-content;
+    height: max-content;
+    transform-origin: 0 0;
+    will-change: transform;
+}
+
+.tech-tier {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 25px;
+    min-width: 220px;
+    z-index: 1; 
+    position: relative;
+}
+
+.upgrade-card { 
+    background: rgba(0,0,0,0.6); 
+    border: 2px solid #555; 
+    padding: 15px; 
+    border-radius: 8px; 
+    transition: border-color 0.3s;
+    width: 260px; /* Feste Breite sorgt im Grid für saubere Ausrichtung */
+	height: 165px;
+    z-index: 1; 
+	display: flex;
+    flex-direction: column;
+}
+
+.upgrade-card .button-container {
+    margin-top: auto;
+}
+
+.upgrade-card h4 { color: var(--ksp-blue); margin-bottom: 5px; font-size: 0.9rem; }
+.upgrade-card p { font-size: 0.75rem; margin-bottom: 10px; color: #ccc; }
+
+.upgrade-card.locked-tech {
+    border-color: #333;
+    background: rgba(0,0,0,0.8);
+    opacity: 0.6;
+}
+.upgrade-card.locked-tech h4 { color: #777; }
+
+.upgrade-card.unlocked-tech {
+    border-color: var(--ksp-blue);
+    background: rgba(var(--ksp-blue), 0.08);
+}
+.upgrade-card.unlocked-tech h4 { color: var(--ksp-blue); }
+
+.upgrade-card.available-tech {
+    border-color: var(--ksp-blue);
+}
+
+.tech-lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.apsis-marker {
+	display: none;
+	font-size: 0.7rem;
+	font-weight: bold;
+	color: rgba(166, 234, 11, 1) !important;
+	transform-origin: bottom center;
+    padding: 1px 2px 4px 2px;
+    z-index: -1;
+    clip-path: polygon(0 0, 100% 0, 100% 65%, 50% 100%, 0 65%);
+    user-select: none;
+    pointer-events: none;
+	background-color: rgba(166, 234, 11, 0.7);
+	position: absolute;
+	top: 100%;
+    left: 50%;
+    transform: translateX(-50%) scale(var(--inv-scale, 1));
+}
+
+#warp-progress-container {
+    transition: all 0.2s ease;
+}
+
+/* Pulsierender Hover-Effekt, wenn die Stufe bereit zum Freischalten ist */
+#warp-progress-container.ready {
+    border-top-color: 2px solid #444;
+    background-color: rgba(243, 156, 18, 0.1);
+}
+
+#warp-progress-container.ready #warp-progress-bar {
+    background: var(--ksp-blue);
+}
+
+#warp-progress-container.ready:hover {
+	transform: scale(1.05);
+}
+
+/* Verhindert, dass der Text im Button markiert wird, wenn man schnell klickt */
+#warp-progress-text {
+    user-select: none;
+    pointer-events: none;
+}
+.floating-warp-text {
+    position: absolute;
+    top: 100px; 
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.4rem;
+    font-weight: bold;
+    text-shadow: 2px 2px 0px #000, -1px -1px 0px #000;
+    pointer-events: none;
+    z-index: 100;
+    animation: warpTextPop 1.2s ease-out forwards;
+    white-space: nowrap;
+}
+
+@keyframes warpTextPop {
+    0% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+
+#missions-container { display: flex; flex-direction: column; }
+
+
+#planet-tooltip {
+    position: fixed;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #444;
+    border-radius: 6px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+    padding: 12px 15px;
+    color: var(--text-main);
+    font-size: 0.9rem;
+    line-height: 1.4;
+    max-width: 260px;
+    z-index: 9999; /* Garantiert, dass es immer im Vordergrund liegt */
+    pointer-events: none; /* Verhindert, dass das Tooltip Klicks oder Hover-Events stört */
+}
+
+#planet-tooltip.hidden {
+    display: none !important;
+}
+
+.buy-toggle-container {
+    position: relative;
+    display: flex;
+    background: rgba(51, 51, 51, 0.5);
+    border: 2px solid #444;
+    border-radius: 6px;
+    overflow: hidden;
+    width: 100%;
+}
+
+.buy-toggle-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 33.333%;
+    background-color: var(--ksp-green);
+    z-index: 1;
+    transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.3s ease;
+    opacity: 0; /* Unsichtbar, wenn kein Modus aktiv ist */
+}
+
+.buy-toggle-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    padding: 10px 0;
+    font-size: 0.9rem;
+    cursor: pointer;
+    z-index: 2; /* Bleibt über dem Slider */
+    position: relative;
+    transition: color 0.3s;
+    text-align: center;
+    outline: none;
+}
+
+.buy-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.buy-toggle-btn.active {
+    color: #111; /* Dunkle Schrift für besseren Kontrast auf dem grünen Slider */
+}
+
+.buy-toggle-btn.active:hover {
+    background: transparent; 
+}						   
+.utility-btn {
+    width: 35px;
+    height: 35px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #444;
+    border-radius: 6px;
+    
+    color: #ffffff;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    transition: all 0.1s ease-in-out;
+}
+
+.utility-btn:hover {
+    filter: brightness(1.2);
+    transform: scale(1.05);
+}
+
+#utility-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+	margin-top: 10px;
+}
+
+.utility-btn:active {
+    transform: scale(0.95);
+}
+
+#music-icon {
+    width: 20px;
+    height: 20px;
+    display: block;
+    object-fit: contain;
+}
+
+#sound-icon {
+    width: 20px;
+    height: 20px;
+    display: block;
+    object-fit: contain;
+}
+
+.help-modal-content {
+	background: rgba(0, 0, 0, 0.8);
+	border: 2px solid #444;
+	width: 630px;
+	max-width: 90%;
+	height: auto;
+}
+
+.help-modal-content .modal-header { border-bottom: none; margin-bottom: 0px;}
+
+#help-modal h3 {
+    color: var(--text-main);
+    margin-top: 20px;
+    text-transform: uppercase;
+}
+
+#help-modal .hotkeys-list {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#help-modal .hotkey-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#help-modal .hotkey-keys kbd {
+    background: #2a2a2a;
+    color: var(--text-main);
+    border: 1px solid #444;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-family: monospace;
+}
+
+/* =========================================
+   Asteroiden Mechanik
+   ========================================= */
+
+#asteroid-layer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    z-index: 50; /* Über den Orbits, unter den Planeten-Wrappern */
+    pointer-events: none; /* Blockiert keine Klicks auf darunterliegende Map-Elemente */
+}
+
+.asteroid-group {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    overflow: visible;
+}
+
+.asteroid-path-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: visible;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.asteroid-path {
+    stroke: rgba(255, 255, 255, 0.3);
+    stroke-width: 2px;
+    fill: none;
+}
+
+.asteroid-sprite {
+    width: 100px;
+    height: 100px;
+	position: absolute;
+    top: 0;
+    left: 0;
+    background-image: url('textures/Asteriod.png');
+	background-size: 32px 32px;
+    background-position: center;
+	background-repeat: no-repeat;
+    cursor: pointer;
+    pointer-events: auto; /* Klicks und Hover für den Sprite aktivieren */
+    /* offset-path wird dynamisch via JS injiziert */
+}
+
+.transfer-progress-bar {
+    background: var(--ksp-green);
+	position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    transition: width 0.2s ease-out;
+}
+
+#transfer-chance-text {
+	margin-bottom: 10px;
+	text-align: center;
+}
+
+.planet.ghost-planet {
+    opacity: 0;
+}
+
+/* =========================================
+   Planet Labels Visibility Setting
+   ========================================= */
+#solar-system-map.labels-hidden .planet-label,
+#solar-system-map.labels-hidden .sun-label {
+    display: none !important;
+}
+
+#unlock-section {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+}
+
+#unlock-scroll-area {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 4px;
+}
+
+#unlock-scroll-area::-webkit-scrollbar {
+    width: 22px;
+}
+
+#unlock-scroll-area::-webkit-scrollbar-track {
+	background: rgba(0, 0, 0, 0.3);
+	border-radius: 10px;
+    border: 8px solid transparent;
+    background-clip: padding-box;
+}
+
+#unlock-scroll-area::-webkit-scrollbar-thumb {
+    background-color: #555; 
+    border-radius: 10px;
+    border: 8px solid transparent;
+    background-clip: padding-box;
+}
+
+#unlock-scroll-area::-webkit-scrollbar-thumb:hover {
+    background: var(--ksp-orange);
+	border-radius: 10px;
+    border: 8px solid transparent;
+    background-clip: padding-box;
+}
+
+/* =========================================
+   Rocket Assembly & Upgrades Panel
+   ========================================= */
+#rocket-assembly-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    margin-top: 15px;
+	border-color: var(--ksp-orange);
+	background: rgba(243, 156, 18, 0.1);
+	margin-bottom: 0px;
+}
+   	
+.rocket-assembly-title {
+    text-align: center;
+    font-size: 0.95rem;
+    color: var(--ksp-orange);
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+	font-family: 'Courier New', Courier, monospace;
+}
+
+.rocket-assembly-wrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.rocket-assembly-img {
+    width: 50%;
+    display: block;
+}
+
+.rocket-upgrade-label {
+    text-align: center;
+	position: absolute;
+    font-size: 0.7rem;
+    color: black;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+	font-family: 'Courier New', Courier, monospace;
+}
+
+/* Exakte Prozent-Positionierung der Upgrades A bis F über dem Raketenbild */
+.rocket-upgrade-label.label-a { top: 11%; left: 50%; }
+.rocket-upgrade-label.label-b { top: 27%; left: 44.3%; }
+.rocket-upgrade-label.label-c { top: 27%; left: 55.7%; }
+.rocket-upgrade-label.label-d { top: 55%; left: 50%; }
+.rocket-upgrade-label.label-e { top: 92%; left: 50%; }
+.rocket-upgrade-label.label-f { top: 69%; left: 69.2%; }
+
+/* Automatisches Ausblenden, wenn die Mission läuft (#btn-unlock hat class "hidden") */
+#btn-unlock.hidden ~ #rocket-assembly-container {
+    display: none !important;
+}
+
+#rocket-assembly-footer {
+    position: static;
+    margin-top: auto; /* Platziert den Text am unteren Rand des orangenen Containers */
+    padding-top: 12px;
+    text-align: center;
+    font-size: 0.75rem;
+    color: #aaa;
+}
+
+.rocket-upgrades-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 15px;
+    margin-bottom: 10px;
+}
+
+.btn-upgrade {
+    border-color: var(--ksp-orange);
+	background: rgba(64, 110, 14, 0.24);
+}
+
+.btn-upgrade:hover {
+    background: rgba(138, 218, 49, 0.25);
+}

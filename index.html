@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kerbal Clicker Program</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main id="game-container">
+        <aside id="mission-panel" class="side-panel">
+            <h2 id="leftPanel-title">Mission Control</h2>
+            <div id="missions-container">
+            </div>
+        </aside>
+
+        <section id="solar-system-map">
+			<div id="map-content">
+				<!-- SVG Layer für die performanten Orbits -->
+				<svg id="orbit-svg-layer" style="position: absolute; top: 50%; left: 50%; overflow: visible; pointer-events: none; z-index: 0;"></svg>
+				<div id="asteroid-layer"></div>
+
+				<!-- Globale AP und PE Marker -->
+				<div class="apsis-marker" id="global-ap-marker" style="display: none;">Ap</div>
+				<div class="apsis-marker" id="global-pe-marker" style="display: none;">Pe</div>
+
+				<!-- Kerbol (Sun) -->
+				<div class="sun" id="kerbol" onclick="selectPlanet('kerbol')">
+					<span class="planet-label sun-label">Kerbol</span>
+				</div>
+				
+				<!-- Moho -->
+				<div class="planet-wrapper" id="wrapper-moho">
+					<div class="planet planet-moho locked" id="planet-moho" onclick="selectPlanet('moho')"></div>
+					<span class="planet-label">Moho</span>
+				</div>
+				
+				<!-- Eve System -->
+				<div class="planet-wrapper" id="wrapper-eve">
+					<div class="planet planet-eve locked" id="planet-eve" onclick="selectPlanet('eve')"></div>
+					<span class="planet-label">Eve</span>
+					
+					<!-- Gilly System -->
+					<div class="planet-wrapper" id="wrapper-gilly">
+						<div class="planet planet-gilly locked" id="planet-gilly" onclick="selectPlanet('gilly'); event.stopPropagation();"></div>
+						<span class="planet-label">Gilly</span>
+					</div>
+				</div>
+				
+				<!-- Kerbin System -->
+				<div class="planet-wrapper" id="wrapper-kerbin">
+					<div class="planet planet-kerbin" id="planet-kerbin" onclick="selectPlanet('kerbin')"></div>
+					<span class="planet-label">Kerbin</span>
+
+					<!-- Mun System -->
+					<div class="planet-wrapper" id="wrapper-mun">
+						<div class="planet planet-mun locked" id="planet-mun" onclick="selectPlanet('mun'); event.stopPropagation();"></div>
+						<span class="planet-label">Mun</span>
+					</div>
+					
+					<!-- Minmus System -->
+					<div class="planet-wrapper" id="wrapper-minmus">
+						<div class="planet planet-minmus locked" id="planet-minmus" onclick="selectPlanet('minmus'); event.stopPropagation();"></div>
+						<span class="planet-label">Minmus</span>
+					</div>
+				</div>
+				
+				<!-- Duna System -->
+				<div class="planet-wrapper" id="wrapper-duna">
+					<div class="planet planet-duna locked" id="planet-duna" onclick="selectPlanet('duna')"></div>
+					<span class="planet-label">Duna</span>
+
+					<!-- Ike System -->
+					<div class="planet-wrapper" id="wrapper-ike">
+						<div class="planet planet-ike locked" id="planet-ike" onclick="selectPlanet('ike'); event.stopPropagation();"></div>
+						<span class="planet-label">Ike</span>
+					</div>
+				</div>
+				
+				<!-- Dres -->
+				<div class="planet-wrapper planet-hidden" id="wrapper-dres">
+					<div class="planet planet-dres locked" id="planet-dres" onclick="selectPlanet('dres')"></div>
+					<span class="planet-label">Dres</span>
+				</div>
+				
+				<!-- Jool System -->
+				<div class="planet-wrapper" id="wrapper-jool">
+					<div class="planet planet-jool locked" id="planet-jool" onclick="selectPlanet('jool')"></div>
+					<span class="planet-label">Jool</span>
+					
+					<!-- Laythe System -->
+					<div class="planet-wrapper" id="wrapper-laythe">
+						<div class="planet planet-laythe locked" id="planet-laythe" onclick="selectPlanet('laythe'); event.stopPropagation();"></div>
+						<span class="planet-label">Laythe</span>
+					</div>
+					
+					<!-- Vall System -->
+					<div class="planet-wrapper" id="wrapper-vall">
+						<div class="planet planet-vall locked" id="planet-vall" onclick="selectPlanet('vall'); event.stopPropagation();"></div>
+						<span class="planet-label">Vall</span>
+					</div>
+					
+					<!-- Tylo System -->
+					<div class="planet-wrapper" id="wrapper-tylo">
+						<div class="planet planet-tylo locked" id="planet-tylo" onclick="selectPlanet('tylo'); event.stopPropagation();"></div>
+						<span class="planet-label">Tylo</span>
+					</div>
+					
+					<!-- Bop System -->
+					<div class="planet-wrapper" id="wrapper-bop">
+						<div class="planet planet-bop locked" id="planet-bop" onclick="selectPlanet('bop'); event.stopPropagation();"></div>
+						<span class="planet-label">Bop</span>
+					</div>
+					
+					<!-- Pol System -->
+					<div class="planet-wrapper" id="wrapper-pol">
+						<div class="planet planet-pol locked" id="planet-pol" onclick="selectPlanet('pol'); event.stopPropagation();"></div>
+						<span class="planet-label">Pol</span>
+					</div>
+				</div>
+				
+				<!-- Eeloo -->
+				<div class="planet-wrapper" id="wrapper-eeloo">
+					<div class="planet planet-eeloo locked" id="planet-eeloo" onclick="selectPlanet('eeloo')"></div>
+					<span class="planet-label" style="display: inline-block;">Eeloo</span>
+				</div>
+			</div>
+            <div id="top-ui-layer">
+				<div id="time-warp-container">
+					<div id="warp-controls">
+						<div id="warp-triangles">
+							<span class="warp-arrow active" onclick="setWarpIndex(0)">▶</span>
+							<span class="warp-arrow" onclick="setWarpIndex(1)">▶</span>
+							<span class="warp-arrow" onclick="setWarpIndex(2)">▶</span>
+							<span class="warp-arrow" onclick="setWarpIndex(3)">▶</span>
+						</div>
+						<div id="warp-label">WARP</div>
+					</div>
+					<div id="mission-time">T+ 00:00:00</div>
+					<div id="warp-progress-container" class="mission-progress-container" onclick="attemptWarpUnlock()" style="display: none;">
+						<div id="warp-progress-bar" class="mission-progress-bar"></div>
+						<span id="warp-progress-text" class="mission-progress-text">0 / 0</span>
+					</div>
+				</div>
+				
+				<div id="rnd-content">
+					<button id="btn-rnd" class="ksp-button">
+						<div id="btn-text">RESEARCH & DEVELOPMENT</div>
+						<div id="rnd-indicator" class="hidden">!</div>
+					</button>
+				</div>	
+				
+				<div id="top-right-ui-container">
+					<div id="resource-display">
+						<span class="label">FUNDS:</span>
+						<div class="resource-sum">
+							<span id="ui-funds" class="value text-green">0</span> 
+							<span class="currency"><img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon"></span>
+						</div>
+						<div class="resource-income text-green small-income">
+							(<span id="ui-income">0</span>/s)
+						</div>
+						<span class="label">SCIENCE:</span>
+						<div class="resource-sum">
+							<span id="ui-science" class="value text-blue">0</span> 
+							<span class="currency"><img src="textures/Science_Icon.png" alt="Science" class="resource-icon"></span>
+						</div>
+						<div class="resource-income text-blue small-income">
+							(<span id="ui-science-income">0</span>/s)
+						</div>
+					</div>
+					<div id="utility-buttons">
+						<button id="btn-debug-menu" class="utility-btn" title="Debug Menu" style="display: none; color: #f39c12;">🛠</button>
+						<button id="btn-help-menu" class="utility-btn" title="Help">?</button>
+						<button class="music-toggle-btn utility-btn icon-music-off" title="Music">
+							<img id="music-icon" src="textures/MusicOff_Icon.png" alt="Music Off">
+						</button>
+						<button class="sound-toggle-btn utility-btn icon-sound-off" title="Sound">
+							<img id="sound-icon" src="textures/SoundOff_Icon.png" alt="Sound Off">
+						</button>
+						<button id="btn-pause-menu" class="utility-btn" title="Pause">☰</button>
+					</div>
+				</div>
+			</div>
+			<div id="map-controls">
+				<input type="range" id="zoom-slider" min="0.3" max="6" step="0.05" value="1">
+			</div>
+        </section>
+
+        <section id="action-panel">
+            <div class="panel-header-nav">
+                <button id="btn-prev-planet" class="nav-arrow">◄</button>
+                <h2 id="panel-title">Planet Name</h2>
+                <button id="btn-next-planet" class="nav-arrow">►</button>
+            </div>
+			
+			<div id="buy-toggle-container" class="buy-toggle-container hidden">
+				<div id="buy-toggle-slider" class="buy-toggle-slider"></div>
+				<button class="buy-toggle-btn" data-mode="10">x10</button>
+				<button class="buy-toggle-btn" data-mode="100">x100</button>
+				<button class="buy-toggle-btn" data-mode="MAX">MAX</button>
+			</div>
+
+			<div id="unlock-section" class="hidden">
+				<div id="unlock-scroll-area">
+					<div id="unlock-req-text" class="hidden" style="color: var(--ksp-red); font-size: 0.9rem; margin-bottom: 10px; text-align: center; font-style: italic;"></div>
+					<div id="transfer-chance-text"></div>
+					<button id="btn-unlock" class="ksp-button btn-green">
+						Launch Transfer Mission<br>
+						(Cost: <span id="unlock-cost">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)
+					</button>
+					<!-- Transfer Progress Bar (Standardmäßig versteckt) -->
+					<div id="transfer-progress-container" class="mission-progress-container hidden" style="margin-top: 15px;">
+						<div id="transfer-progress-bar" class="transfer-progress-bar"></div>
+						<span id="transfer-progress-text" class="mission-progress-text">T - 00:00</span>
+					</div>
+					<button id="btn-transfer-fail-confirm" class="ksp-button btn-red hidden">Confirm</button>
+					<!-- Rocket Assembly & Upgrades Container (Standardmäßig versteckt) -->
+					<div id="rocket-assembly-container" class="action-card" style="margin-top: 15px;">
+						<div class="rocket-assembly-title">Rocket Assembly &amp; Upgrades</div>
+						<div class="rocket-assembly-wrapper">
+							<img src="textures/rocketStaging.png" alt="Rocket Staging" class="rocket-assembly-img">
+							<div id="rocket-upgrade-a" class="rocket-upgrade-label label-a">[A]<br>0/5</div>
+							<div id="rocket-upgrade-b" class="rocket-upgrade-label label-b">[B]<br>0/5</div>
+							<div id="rocket-upgrade-c" class="rocket-upgrade-label label-c">[C]<br>0/5</div>
+							<div id="rocket-upgrade-d" class="rocket-upgrade-label label-d">[D]<br>0/5</div>
+							<div id="rocket-upgrade-e" class="rocket-upgrade-label label-e">[E]<br>0/5</div>
+							<div id="rocket-upgrade-f" class="rocket-upgrade-label label-f">[F]<br>0/5</div>
+						</div>
+						
+						<!-- Grid für die direkten Raketen-Upgrades -->
+						<div class="rocket-upgrades-grid">
+							<button id="btn-upgrade-a" class="ksp-button btn-upgrade">Upgrade [A]<br>Capsule<br>
+							(Cost: <span id="upgrade-a-cost">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)
+							</button>
+							<button id="btn-upgrade-b" class="ksp-button btn-upgrade">Upgrade [B]<br>Antenna<br>
+							(Cost: <span id="upgrade-b-cost">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)
+							</button>
+							<button id="btn-upgrade-c" class="ksp-button btn-upgrade">Upgrade [C]<br>Batterie<br>
+							(Cost: <span id="upgrade-c-cost">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)
+							</button>
+							<button id="btn-upgrade-d" class="ksp-button btn-upgrade">Upgrade [D]<br>Fuel Tank<br>
+							(Cost: <span id="upgrade-d-cost">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)
+							</button>
+							<button id="btn-upgrade-e" class="ksp-button btn-upgrade">Upgrade [E]<br>Main Engine<br>
+							(Cost: <span id="upgrade-e-cost">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)
+							</button>
+							<button id="btn-upgrade-f" class="ksp-button btn-upgrade">Upgrade [F]<br>Stabilizers<br>
+							(Cost: <span id="upgrade-f-cost">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)
+							</button>
+						</div>
+						
+						<div id="rocket-assembly-footer">Higher levels improve success chance</div>
+					</div>
+				</div>
+			</div>
+		 
+			<div id="economy-section" class="hidden">
+				<div id="economy-scroll-area">			
+					<div class="action-card" id="rocket-card">
+						<div id="launchpad-label">LAUNCHPAD - MANUAL CONTROL</div>
+						<div id="rocket-content">
+							<h3>🚀 Rocket Launch (Click)</h3>
+							<div class="stat-grid">
+								<span>Boosters:</span> <span class="stat-val"><span id="rocket-owned">0</span></span>
+								<span>Click Value:</span> <span class="stat-val text-green">+<span id="rocket-power">1</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon"></span>
+							</div>
+							<button id="btn-click" class="ksp-button">Manual Launch!</button>
+							<button id="btn-buy-rocket" class="ksp-button btn-green">Add Moar Boosters! (<span id="rocket-cost">10</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+						</div>
+					</div>
+				
+					<div class="action-card" id="comm-net-relay-card">
+						<h3>📡 CommNet Relay</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="comm-net-relay-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="comm-net-relay-single">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-blue">+<span id="comm-net-relay-power">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-comm-net-relay" class="ksp-button btn-blue">Build Unit (<span id="comm-net-relay-cost">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">)</button>
+					</div>
+				
+					<div class="action-card" id="miner-card">
+						<h3>🚜 Mining Rig</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="miner-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="miner-single">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-green">+<span id="miner-power">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-miner" class="ksp-button btn-green">Build (<span id="miner-cost">50</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="science-card">
+						<h3>🔬 Science Laboratory</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="lab-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="lab-single">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-blue">+<span id="lab-power">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-lab" class="ksp-button btn-blue">Build Lab (<span id="lab-cost">500</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="hotel-card">
+						<h3>🏨 Orbital Tourism Hotel</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="hotel-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="hotel-single">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-green">+<span id="hotel-power">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-hotel" class="ksp-button btn-green">Launch Module (<span id="hotel-cost">2500</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="station-card">
+						<h3>🛰️ Orbital Research Station</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="station-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="station-single">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-blue">+<span id="station-power">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-station" class="ksp-button btn-blue">Launch Module (<span id="station-cost">4000</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="rover-card">
+						<h3>🚙 Autonomous Science Rover</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="rover-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="rover-single">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-blue">+<span id="rover-power">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-rover" class="ksp-button btn-blue">Launch Rover (<span id="rover-cost">200</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="he3-card">
+						<h3>🏭 Helium-3 Extractor</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="he3-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="he3-single">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-green">+<span id="he3-power">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-he3" class="ksp-button btn-green">Build (<span id="he3-cost">8000</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="lko-fuel-card">
+						<h3>⛽ LKO Fuel Station</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="lko-fuel-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="lko-fuel-single">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-green">+<span id="lko-fuel-power">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-lko-fuel" class="ksp-button btn-green">Build (<span id="lko-fuel-cost">1200</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="telescope-card">
+						<h3>🔭 Telescope Observatory</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="telescope-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="telescope-single">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-blue">+<span id="telescope-power">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-telescope" class="ksp-button btn-blue">Build Lab (<span id="telescope-cost">800</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="training-card">
+						<h3>🏫 Kerbal Training Center</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="training-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="training-single">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-blue">+<span id="training-power">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-training" class="ksp-button btn-blue">Build Center (<span id="training-cost">1500</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="tourism-shuttle-card">
+						<h3>🚀 Tourism Shuttle</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="tourism-shuttle-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="tourism-shuttle-single">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-green">+<span id="tourism-shuttle-power">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-tourism-shuttle" class="ksp-button btn-green">Build (<span id="tourism-shuttle-cost">2200</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="fuel-refinery-card">
+						<h3>⛽ Fuel Refinery</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="fuel-refinery-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="fuel-refinery-single">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-green">+<span id="fuel-refinery-power">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-fuel-refinery" class="ksp-button btn-green">Build (<span id="fuel-refinery-cost">4500</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="regolith-lab-card">
+						<h3>🔬 Regolith Laboratory</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="regolith-lab-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="regolith-lab-single">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-blue">+<span id="regolith-lab-power">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-regolith-lab" class="ksp-button btn-blue">Build Lab (<span id="regolith-lab-cost">1200</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="crater-research-card">
+						<h3>🏗️ Lunar Crater Research Base</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="crater-research-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="crater-research-single">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-blue">+<span id="crater-research-power">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-crater-research" class="ksp-button btn-blue">Build Base (<span id="crater-research-cost">2500</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="mystery-goo-card">
+						<h3>🧪 MysteryGoo Surface Experiment</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="mystery-goo-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="mystery-goo-single">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-blue">+<span id="mystery-goo-power">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-mystery-goo" class="ksp-button btn-blue">Deploy (<span id="mystery-goo-cost">800</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="ice-extractor-card">
+						<h3>🧊 Ice Extractor</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="ice-extractor-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="ice-extractor-single">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-green">+<span id="ice-extractor-power">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-ice-extractor" class="ksp-button btn-green">Build (<span id="ice-extractor-cost">3500</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="space-elevator-card">
+						<h3>🗼 Space Elevator</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="space-elevator-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="space-elevator-single">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-green">+<span id="space-elevator-power">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-space-elevator" class="ksp-button btn-green">Construct (<span id="space-elevator-cost">25000</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="parachute-prod-card">
+						<h3>🪂 Parachute Production</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="parachute-prod-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="parachute-prod-single">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-green">+<span id="parachute-prod-power">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-parachute-prod" class="ksp-button btn-green">Build (<span id="parachute-prod-cost">10000</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="high-pressure-lab-card">
+						<h3>🔬 High-Pressure Atmosphere Lab</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="high-pressure-lab-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="high-pressure-lab-single">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-blue">+<span id="high-pressure-lab-power">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-high-pressure-lab" class="ksp-button btn-blue">Build Lab (<span id="high-pressure-lab-cost">12000</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="gravioli-detector-card">
+						<h3>📡 Gravioli Detector Surface Exp.</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="gravioli-detector-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="gravioli-detector-single">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-blue">+<span id="gravioli-detector-power">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-gravioli-detector" class="ksp-button btn-blue">Deploy (<span id="gravioli-detector-cost">18000</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="colony-module-card">
+						<h3>🏡 Colony Habitation Module</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="colony-module-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="colony-module-single">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-green">+<span id="colony-module-power">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-colony-module" class="ksp-button btn-green">Build Module (<span id="colony-module-cost">18000</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="spacey-lifter-card">
+						<h3>🚀 SpaceY Heavy Lifter</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="spacey-lifter-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="spacey-lifter-single">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-green">+<span id="spacey-lifter-power">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-spacey-lifter" class="ksp-button btn-green">Launch (<span id="spacey-lifter-cost">28000</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="fuel-export-card">
+						<h3>⛽ Fuel Export Base</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="fuel-export-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="fuel-export-single">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-green">+<span id="fuel-export-power">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-fuel-export" class="ksp-button btn-green">Build Base (<span id="fuel-export-cost">45000</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="geologic-lab-card">
+						<h3>🔬 Geological Analysis Lab</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="geologic-lab-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="geologic-lab-single">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-blue">+<span id="geologic-lab-power">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-geologic-lab" class="ksp-button btn-blue">Build Lab (<span id="geologic-lab-cost">15000</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="greenhouse-card">
+						<h3>🌱 Greenhouse</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="greenhouse-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="greenhouse-single">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-blue">+<span id="greenhouse-power">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-greenhouse" class="ksp-button btn-blue">Construct (<span id="greenhouse-cost">22000</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="cloud-city-card">
+						<h3>☁️ Cloud City Hotel</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="cloud-city-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="cloud-city-single">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-green">+<span id="cloud-city-power">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-cloud-city" class="ksp-button btn-green">Construct (<span id="cloud-city-cost">90000</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="floating-miner-card">
+						<h3>🎈 Floating Gas Miner</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="floating-miner-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="floating-miner-single">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-green">+<span id="floating-miner-power">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-floating-miner" class="ksp-button btn-green">Launch (<span id="floating-miner-cost">60000</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="he4-card">
+						<h3>⚛️ Helium-4 Extractor</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="he4-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="he4-single">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-green">+<span id="he4-power">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-he4" class="ksp-button btn-green">Build (<span id="he4-cost">120000</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="atmosphere-scoop-card">
+						<h3>🛰️ Atmosphere Scoop Probe</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="atmosphere-scoop-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="atmosphere-scoop-single">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-blue">+<span id="atmosphere-scoop-power">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-atmosphere-scoop" class="ksp-button btn-blue">Launch (<span id="atmosphere-scoop-cost">50000</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="ssto-freighter-card">
+						<h3>🛸 SSTO Freighter</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="ssto-freighter-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="ssto-freighter-single">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-green">+<span id="ssto-freighter-power">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-ssto-freighter" class="ksp-button btn-green">Launch (<span id="ssto-freighter-cost">85000</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="ocean-research-card">
+						<h3>🌊 Ocean Research Base</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="ocean-research-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="ocean-research-single">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-blue">+<span id="ocean-research-power">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-ocean-research" class="ksp-button btn-blue">Build Base (<span id="ocean-research-cost">40000</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="underwater-probe-card">
+						<h3>🦑 Underwater Research Probe</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="underwater-probe-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="underwater-probe-single">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-blue">+<span id="underwater-probe-power">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-underwater-probe" class="ksp-button btn-blue">Deploy (<span id="underwater-probe-cost">55000</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="tidal-station-card">
+						<h3>🌊 Tidal Measurement Station</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="tidal-station-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="tidal-station-single">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-blue">+<span id="tidal-station-power">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-tidal-station" class="ksp-button btn-blue">Construct (<span id="tidal-station-cost">70000</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="xeno-bio-card">
+						<h3>🧬 Xeno-Biology Station</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="xeno-bio-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="xeno-bio-single">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-blue">+<span id="xeno-bio-power">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-xeno-bio" class="ksp-button btn-blue">Construct (<span id="xeno-bio-cost">95000</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="supply-depot-card">
+						<h3>📦 Supply Depot</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="supply-depot-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="supply-depot-single">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-green">+<span id="supply-depot-power">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-supply-depot" class="ksp-button btn-green">Construct (<span id="supply-depot-cost">110000</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="exotic-ice-card">
+						<h3>🍦 Exotic Ice Cream Seller</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="exotic-ice-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="exotic-ice-single">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-green">+<span id="exotic-ice-power">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-exotic-ice" class="ksp-button btn-green">Establish (<span id="exotic-ice-cost">150000</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="deep-ice-drill-card">
+						<h3>⛏️ Deep Ice Drill</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="deep-ice-drill-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="deep-ice-drill-single">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-green">+<span id="deep-ice-drill-power">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-deep-ice-drill" class="ksp-button btn-green">Drill (<span id="deep-ice-drill-cost">200000</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="cryo-lab-card">
+						<h3>❄️ Cryogenic Laboratory</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="cryo-lab-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="cryo-lab-single">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-blue">+<span id="cryo-lab-power">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-cryo-lab" class="ksp-button btn-blue">Build Lab (<span id="cryo-lab-cost">80000</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="long-cryo-lab-card">
+						<h3>🧊 Long-Term Cryosleep Lab</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="long-cryo-lab-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="long-cryo-lab-single">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-blue">+<span id="long-cryo-lab-power">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-long-cryo-lab" class="ksp-button btn-blue">Build Lab (<span id="long-cryo-lab-cost">130000</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">)</button>
+					</div>
+					
+					<div class="action-card" id="heat-shield-prod-card">
+						<h3>🛡️ Heat Shield Production</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="heat-shield-prod-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="heat-shield-prod-single">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-green">+<span id="heat-shield-prod-power">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-heat-shield-prod" class="ksp-button btn-green">Build Production (<span id="heat-shield-prod-cost">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="solar-power-plant-card">
+						<h3>☀️ Solar Power Plant</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="solar-power-plant-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="solar-power-plant-single">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-green">+<span id="solar-power-plant-power">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-solar-power-plant" class="ksp-button btn-green">Build Plant (<span id="solar-power-plant-cost">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="ion-drive-probe-card">
+						<h3>🛰️ Ion Drive Probe</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="ion-drive-probe-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="ion-drive-probe-single">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-blue">+<span id="ion-drive-probe-power">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-ion-drive-probe" class="ksp-button btn-blue">Build Probe (<span id="ion-drive-probe-cost">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="solar-obs-platform-card">
+						<h3>🔭 Solar Observation Platform</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="solar-obs-platform-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="solar-obs-platform-single">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-blue">+<span id="solar-obs-platform-power">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-solar-obs-platform" class="ksp-button btn-blue">Build Platform (<span id="solar-obs-platform-cost">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="thermal-res-lab-card">
+						<h3>🌡️ Thermal Resistance Laboratory</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="thermal-res-lab-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="thermal-res-lab-single">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-blue">+<span id="thermal-res-lab-power">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-thermal-res-lab" class="ksp-button btn-blue">Build Lab (<span id="thermal-res-lab-cost">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="plasma-physics-lab-card">
+						<h3>⚡ Plasma Physics Laboratory</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="plasma-physics-lab-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="plasma-physics-lab-single">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-blue">+<span id="plasma-physics-lab-power">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-plasma-physics-lab" class="ksp-button btn-blue">Build Lab (<span id="plasma-physics-lab-cost">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="low-grav-ore-transporter-card">
+						<h3>🚛 Low-Gravity Ore Transporter</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="low-grav-ore-transporter-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="low-grav-ore-transporter-single">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-green">+<span id="low-grav-ore-transporter-power">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-low-grav-ore-transporter" class="ksp-button btn-green">Build Transporter (<span id="low-grav-ore-transporter-cost">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="heavy-lander-card">
+						<h3>🛬 Heavy Lander</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="heavy-lander-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="heavy-lander-single">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-green">+<span id="heavy-lander-power">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-heavy-lander" class="ksp-button btn-green">Build Lander (<span id="heavy-lander-cost">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="mass-catapult-card">
+						<h3>🚀 Mass Catapult Launch Pad</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="mass-catapult-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="mass-catapult-single">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-green">+<span id="mass-catapult-power">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-mass-catapult" class="ksp-button btn-green">Build Pad (<span id="mass-catapult-cost">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="ice-crystal-export-card">
+						<h3>🧊 Ice Crystal Export Freighter</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="ice-crystal-export-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="ice-crystal-export-single">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-green">+<span id="ice-crystal-export-power">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-ice-crystal-export" class="ksp-button btn-green">Build Freighter (<span id="ice-crystal-export-cost">0</span> <img src="textures/Funds_Icon.png" alt="Funds" class="resource-icon">)</button>
+					</div>
+
+					<div class="action-card" id="dwarf-planet-research-card">
+						<h3>🔬 Dwarf Planet Research Facility</h3>
+						<div class="stat-grid">
+							<span>Owned:</span> <span class="stat-val"><span id="dwarf-planet-research-owned">0</span></span>
+							<span>Yield/Ea:</span> <span class="stat-val">+<span id="dwarf-planet-research-single">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+							<span>Total:</span> <span class="stat-val text-blue">+<span id="dwarf-planet-research-power">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">/s</span>
+						</div>
+						<button id="btn-buy-dwarf-planet-research" class="ksp-button btn-blue">Build Facility (<span id="dwarf-planet-research-cost">0</span> <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">)</button>
+					</div>
+
+				</div>
+			</div>
+        </section>
+    </main>
+
+    <div id="rnd-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Research & Development (Tech Tree)</h2>
+                <button id="btn-close-rnd" class="close-btn">X</button>
+            </div>
+            <p>
+				Use Science <img src="textures/Science_Icon.png" alt="Science" class="resource-icon"> to unlock technologies. 
+				<span id="rnd-science-display" class="text-blue" style="margin-left: 10px;">(Current: 0 <img src="textures/Science_Icon.png" alt="Science" class="resource-icon">)</span>
+			</p>
+            <div id="upgrades-container" class="tech-tree-viewport">
+                <div id="tech-tree-canvas" class="tech-tree-canvas"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="esc-modal" class="modal hidden">
+        <div class="modal-content esc-menu-content">
+            <div class="modal-header">
+                <h2>GAME PAUSED</h2>
+                <button id="btn-close-esc" class="close-btn">X</button>
+            </div>
+            <div class="esc-menu-buttons">
+                <button id="btn-resume" class="ksp-button btn-green">RESUME GAME</button>
+				<button id="btn-feedback" class="ksp-button btn-blue">GIVE FEEDBACK</button>
+                <button id="btn-reset" class="ksp-button btn-red">ABORT PROGRAM</button>
+				
+				<div class="esc-separator"></div>
+				
+				<div class="esc-sliders">
+					<div class="slider-group">
+						<button id="btn-toggle-music" class="music-toggle-btn utility-btn icon-sound-off" title="Music">
+						<img id="music-icon" src="textures/MusicOff_Icon.png" alt="Music Off">
+						</button>
+						<input type="range" id="slider-music" class="ksp-slider" min="0" max="100" value="50">
+					</div>
+					<div class="slider-group">
+						<button id="btn-toggle-sound" class="sound-toggle-btn utility-btn icon-sound-off" title="Sound">
+							<img id="sound-icon" src="textures/SoundOff_Icon.png" alt="Sound Off">
+						</button>
+						<input type="range" id="slider-sound" class="ksp-slider" min="0" max="100" value="50">
+					</div>
+				</div>
+				<div class="esc-separator"></div>
+				<div class="checkbox-group" style="display: flex; justify-content: center; align-items: center; margin-top: 15px; color: #fff; font-family: monospace; font-size: 0.9rem;">
+					<label style="cursor: pointer; display: flex; align-items: center;">
+						<input type="checkbox" id="checkbox-show-labels" checked onchange="togglePlanetLabels(this.checked)" style="margin-right: 10px; cursor: pointer;">
+						Show Planet Labels
+					</label>
+				</div>	
+            </div>
+        </div>
+    </div>
+	
+	<div id="warp-locked-modal" class="modal hidden">
+		<div class="modal-content esc-menu-content" style="border-color: #e74c3c;">
+			<div class="modal-header" style="border-bottom: none;">
+				<h2 style="color: #e74c3c;">WARP LEVEL LOCKED</h2>
+				<button id="btn-close-warp-alert" class="close-btn">X</button>
+			</div>
+			<p style="margin-bottom: 20px; text-align: center; font-size: 0.9rem; line-height: 1.4;">
+				You haven't unlocked this time warp level yet!<br><br>
+				Keep collecting Science <img src="textures/Science_Icon.png" alt="Science" class="resource-icon"> for an upgrade.
+			</p>
+			<div class="esc-menu-buttons">
+				<button id="btn-ok-warp-alert" class="ksp-button btn-red">Acknowledge</button>
+			</div>
+		</div>
+	</div>
+	
+	<div id="reset-confirm-modal" class="modal hidden">
+		<div class="modal-content esc-menu-content" style="border-color: #e74c3c;">
+			<div class="modal-header" style="border-bottom: none;">
+				<h2 style="color: #e74c3c;">WARNING</h2>
+				<button id="btn-close-reset-confirm" class="close-btn">X</button>
+			</div>
+			<p style="margin-bottom: 20px; text-align: center; font-size: 0.9rem; line-height: 1.4;">
+				Are you sure you want to abort your program?<br><br>
+				This will completely reset your game progress!
+			</p>
+			<div class="esc-menu-buttons">
+				<button id="btn-cancel-reset" class="ksp-button btn-green">No</button>
+				<button id="btn-confirm-reset" class="ksp-button btn-red">Reset Progress</button>
+			</div>
+		</div>
+	</div>
+	
+	<div id="warp-upgrade-modal" class="modal hidden">
+		<div class="modal-content esc-menu-content" style="border-color: var(--ksp-blue);">
+			<div class="modal-header" style="border-bottom: none;">
+				<h2 style="color: var(--ksp-blue);">RESTRUCTURE AGENCY</h2>
+				<button id="btn-close-warp-upgrade" class="close-btn">X</button>
+			</div>
+			<p style="margin-bottom: 20px; text-align: center; font-size: 0.9rem; line-height: 1.4;">
+				WARNING: Unlock the next Time-Warp level?<br><br>
+				This requires restructuring the agency! Your entire game progress (Funds, Buildings, Research, Contracts) will be completely reset!<br><br>
+				Your unlocked warp levels and mission time (T+) will remain permanently.
+			</p>
+			<div class="esc-menu-buttons">
+				<button id="btn-cancel-warp-upgrade" class="ksp-button btn-blue">Cancel</button>
+				<button id="btn-confirm-warp-upgrade" class="ksp-button btn-red">Unlock & Restart</button>
+			</div>
+		</div>
+	</div>
+	
+	<div id="help-modal" class="modal hidden">
+		<div class="modal-content help-modal-content">
+			<div class="modal-header">
+				<h2>HELP</h2>
+				<button id="btn-close-help" class="close-btn">X</button>
+			</div>
+			<div class="button-container">
+				<button id="btn-start-tutorial" class="ksp-button btn-blue">Start Tutorial Tour</button>
+			</div>
+			
+			<h3>Hotkeys</h3>
+			<div class="hotkeys-list">
+				<div class="hotkey-row">
+					<span class="hotkey-keys"><kbd>ESC</kbd></span>
+					<span class="hotkey-desc">Pause / Close active menu</span>
+				</div>
+				<div class="hotkey-row">
+					<span class="hotkey-keys"><kbd>Space</kbd></span>
+					<span class="hotkey-desc">Manual Launch/Click</span>
+				</div>
+				<div class="hotkey-row">
+					<span class="hotkey-keys"><kbd>F</kbd></span>
+					<span class="hotkey-desc">Toggle R&D Center</span>
+				</div>
+				<div class="hotkey-row">
+					<span class="hotkey-keys"><kbd>,</kbd> <kbd>.</kbd></span>
+					<span class="hotkey-desc">Time Warp Up/Down</span>
+				</div>
+				<div class="hotkey-row">
+					<span class="hotkey-keys"><kbd>A</kbd> <kbd>D</kbd></span>
+					<span class="hotkey-desc">Cycle Planets</span>
+				</div>
+				<div class="hotkey-row">
+					<span class="hotkey-keys"><kbd>W</kbd> <kbd>S</kbd></span>
+					<span class="hotkey-desc">Cycle Unlocked</span>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div id="debug-modal" class="modal hidden">
+		<div class="modal-content esc-menu-content">
+			<div class="modal-header" style="border-bottom: none;">
+				<h2>DEBUG MENU</h2>
+				<button id="btn-close-debug" class="close-btn">X</button>
+			</div>
+			<div class="esc-menu-buttons">
+				<button id="btn-cheat-research" class="ksp-button btn-blue">Unlock All Research</button>
+				<button id="btn-cheat-warp" class="ksp-button btn-red">Unlock All Warp Levels</button>
+				<button id="btn-cheat-funds-science" class="ksp-button btn-green">+1G Funds & Science</button>
+				<button id="btn-cheat-total-science" class="ksp-button btn-blue">+1G total science</button>
+				<button id="btn-cheat-planets" class="ksp-button btn-blue">Unlock All Planets</button>
+			</div>
+		</div>
+	</div>
+
+	<audio id="bg-music" loop><source src="sounds/music.mp3" type="audio/mpeg"></audio>
+    <script src="data.js"></script>
+	<script src="asteroids.js"></script>
+	<script src="techTree.js"></script>
+	<script src="ui.js"></script>
+	<script src="audio.js"></script>
+	<script src="game.js"></script>
+	<script src="debug.js"></script>
+</body>
+</html>
