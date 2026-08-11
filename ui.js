@@ -134,6 +134,55 @@ function spawnFloatingTexts(globalMult) {
     }
 }
 
+function generateUnitCards() {
+    const container = document.getElementById('economy-scroll-area');
+    if (!container) return;
+
+    let html = '';
+
+    for (const [unitKey, unitData] of Object.entries(unitDOMMapping)) {
+        const prefix = unitData.prefix;
+        const cardId = unitData.cardId;
+        const title = unitData.title || 'Unknown Unit';
+        const btnText = unitData.btnText || 'Build';
+
+        if (unitData.isRocket) {
+            html += `
+            <div class="action-card" id="${cardId}">
+                <div id="launchpad-label">LAUNCHPAD - MANUAL CONTROL</div>
+                <div id="rocket-content">
+                    <h3>${title}</h3>
+                    <div class="stat-grid">
+                        <span>Boosters:</span> <span class="stat-val"><span id="${prefix}-owned">0</span></span>
+                        <span>Click Value:</span> <span class="stat-val text-green">+<span id="${prefix}-power">1</span> ${ICON_FUNDS}</span>
+                    </div>
+                    <button id="btn-click" class="ksp-button">Manual Launch!</button>
+                    <button id="btn-buy-${prefix}" class="ksp-button btn-green">${btnText} (<span id="${prefix}-cost">10</span> ${ICON_FUNDS})</button>
+                </div>
+            </div>`;
+            continue;
+        }
+
+        const isScience = unitData.yieldResource === 'science';
+        const icon = isScience ? ICON_SCI : ICON_FUNDS;
+        const textColor = isScience ? 'text-blue' : 'text-green';
+        const btnClass = isScience ? 'btn-blue' : 'btn-green';
+
+        html += `
+        <div class="action-card" id="${cardId}">
+            <h3>${title}</h3>
+            <div class="stat-grid">
+                <span>Owned:</span> <span class="stat-val"><span id="${prefix}-owned">0</span></span>
+                <span>Yield/Ea:</span> <span class="stat-val">+<span id="${prefix}-single">0</span> ${icon}/s</span>
+                <span>Total:</span> <span class="stat-val ${textColor}">+<span id="${prefix}-power">0</span> ${icon}/s</span>
+            </div>
+            <button id="btn-buy-${prefix}" class="ksp-button ${btnClass}">${btnText} (<span id="${prefix}-cost">0</span> ${icon})</button>
+        </div>`;
+    }
+
+    container.innerHTML = html;
+}
+
 function updateFastUI() {
     uiCache.funds.innerText = formatNumber(gameData.funds);
     uiCache.income.innerText = formatNumber(getTotalIncome());
@@ -400,15 +449,12 @@ function updatePanel() {
     document.getElementById('buy-toggle-container').classList.remove('hidden');
     document.getElementById('economy-section').classList.remove('hidden');
 
-    Object.values(unitDOMMapping).forEach(mapping => {
+	Object.values(unitDOMMapping).forEach(mapping => {
         const card = document.getElementById(mapping.cardId);
         if (card) card.classList.add('hidden');
     });
 
-    const minerMult = gameData.upgrades.efficientMiners.unlocked ? 1.5 : 1;
     const globalMult = gameData.upgrades.kerbalKonstructs.unlocked ? 2 : 1;
-    const prMult = gameData.upgrades.publicRelations.unlocked ? 2 : 1; 
-    const commMult = gameData.upgrades.commNetRelay.unlocked ? 1.5 : 1;
 
     for (const [unitKey, mapping] of Object.entries(unitDOMMapping)) {
         if (!planet.units[unitKey]) continue;
@@ -459,11 +505,11 @@ function updatePanel() {
             continue;
         }
 
-        let powerMult = 1;
-        if (unitKey === 'miner') powerMult = minerMult * globalMult;
-        if (unitKey === 'touristHotel') powerMult = prMult * globalMult;
-        if (unitKey === 'he3Extractor' || unitKey === 'lkoFuelDepot' || unitKey === 'iceExtractor' || unitKey === 'spaceElevator' || unitKey === 'parachuteProd' || unitKey === 'cloudCityHotel' || unitKey === 'floatingMiner' || unitKey === 'he4Extractor' || unitKey === 'sstoFreighter' || unitKey === 'colonyModule' || unitKey === 'spaceyLifter' || unitKey === 'fuelExport' || unitKey === 'tourismShuttle' || unitKey === 'fuelRefinery' || unitKey === 'supplyDepot' || unitKey === 'exoticIceSale' || unitKey === 'deepIceDrill' || unitKey === 'heatShieldProd' || unitKey === 'solarPowerPlant' || unitKey === 'lowGravOreTransporter' || unitKey === 'heavyLander' || unitKey === 'massCatapult' || unitKey === 'iceCrystalExport') powerMult = globalMult;
-        if (unitKey === 'scienceLab' || unitKey === 'researchStation' || unitKey === 'telescopeObs' || unitKey === 'kerbalTraining' || unitKey === 'regolithLab' || unitKey === 'craterResearch' || unitKey === 'highPressureLab' || unitKey === 'oceanResearch' || unitKey === 'xenoBioStation' || unitKey === 'cryoLab' || unitKey === 'longCryoLab' || unitKey === 'geologicLab' || unitKey === 'solarObsPlatform' || unitKey === 'thermalResLab' || unitKey === 'plasmaPhysicsLab' || unitKey === 'dwarfPlanetResearch' || unitKey === 'commNetRelayUnit') powerMult = commMult;
+        let powerMult = getUnitMultiplier(unitKey);
+        
+        if (mapping.yieldResource === 'funds') {
+            powerMult *= globalMult;
+        }
         
         const singleEl = document.getElementById(`${prefix}-single`);
         if (singleEl) singleEl.innerText = formatNumber(unit.basePower * powerMult);

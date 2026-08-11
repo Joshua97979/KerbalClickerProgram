@@ -7,59 +7,83 @@ const ICON_SCI = '<img src="textures/Science_Icon.png" alt="Science" class="reso
 const warpThresholds = [0, 1000, 100000, 10000000];
 const warpLevels = [1, 4, 10, 20];
 
+// data.js
+
 const unitDOMMapping = {
-    rocket: { cardId: 'rocket-card', prefix: 'rocket', isClick: true },
-    miner: { cardId: 'miner-card', prefix: 'miner' },
-    scienceLab: { cardId: 'science-card', prefix: 'lab' },
-    touristHotel: { cardId: 'hotel-card', prefix: 'hotel', req: 'unlockTouristHotel' },
-    researchStation: { cardId: 'station-card', prefix: 'station', req: 'unlockResearchStation' },
-    rover: { cardId: 'rover-card', prefix: 'rover', req: 'unlockRover' },
-    he3Extractor: { cardId: 'he3-card', prefix: 'he3', req: 'unlockHe3' },
-    lkoFuelDepot: { cardId: 'lko-fuel-card', prefix: 'lko-fuel', req: 'docking'},
-    telescopeObs: { cardId: 'telescope-card', prefix: 'telescope' },
-    kerbalTraining: { cardId: 'training-card', prefix: 'training' },
-    tourismShuttle: { cardId: 'tourism-shuttle-card', prefix: 'tourism-shuttle' },
-    fuelRefinery: { cardId: 'fuel-refinery-card', prefix: 'fuel-refinery' },
-    regolithLab: { cardId: 'regolith-lab-card', prefix: 'regolith-lab' },
-    craterResearch: { cardId: 'crater-research-card', prefix: 'crater-research' },
-    mysteryGoo: { cardId: 'mystery-goo-card', prefix: 'mystery-goo' },
-    iceExtractor: { cardId: 'ice-extractor-card', prefix: 'ice-extractor' },
-    spaceElevator: { cardId: 'space-elevator-card', prefix: 'space-elevator', req: 'spaceElevatorTech' },
-    parachuteProd: { cardId: 'parachute-prod-card', prefix: 'parachute-prod' },
-    highPressureLab: { cardId: 'high-pressure-lab-card', prefix: 'high-pressure-lab' },
-    gravioliDetector: { cardId: 'gravioli-detector-card', prefix: 'gravioli-detector' },
-    colonyModule: { cardId: 'colony-module-card', prefix: 'colony-module' },
-    spaceyLifter: { cardId: 'spacey-lifter-card', prefix: 'spacey-lifter' },
-    fuelExport: { cardId: 'fuel-export-card', prefix: 'fuel-export' },
-    geologicLab: { cardId: 'geologic-lab-card', prefix: 'geologic-lab' },
-    greenhouse: { cardId: 'greenhouse-card', prefix: 'greenhouse' },
-    cloudCityHotel: { cardId: 'cloud-city-card', prefix: 'cloud-city' },
-    floatingMiner: { cardId: 'floating-miner-card', prefix: 'floating-miner' },
-    he4Extractor: { cardId: 'he4-card', prefix: 'he4' },
-    atmosphereScoop: { cardId: 'atmosphere-scoop-card', prefix: 'atmosphere-scoop' },
-    sstoFreighter: { cardId: 'ssto-freighter-card', prefix: 'ssto-freighter' },
-    oceanResearch: { cardId: 'ocean-research-card', prefix: 'ocean-research' },
-    underwaterProbe: { cardId: 'underwater-probe-card', prefix: 'underwater-probe' },
-    tidalStation: { cardId: 'tidal-station-card', prefix: 'tidal-station' },
-    xenoBioStation: { cardId: 'xeno-bio-card', prefix: 'xeno-bio' },
-    supplyDepot: { cardId: 'supply-depot-card', prefix: 'supply-depot' },
-    exoticIceSale: { cardId: 'exotic-ice-card', prefix: 'exotic-ice' },
-    deepIceDrill: { cardId: 'deep-ice-drill-card', prefix: 'deep-ice-drill' },
-    cryoLab: { cardId: 'cryo-lab-card', prefix: 'cryo-lab' },
-    longCryoLab: { cardId: 'long-cryo-lab-card', prefix: 'long-cryo-lab' },
-    heatShieldProd: { cardId: 'heat-shield-prod-card', prefix: 'heat-shield-prod' },
-    solarPowerPlant: { cardId: 'solar-power-plant-card', prefix: 'solar-power-plant' },
-    lowGravOreTransporter: { cardId: 'low-grav-ore-transporter-card', prefix: 'low-grav-ore-transporter' },
-    heavyLander: { cardId: 'heavy-lander-card', prefix: 'heavy-lander' },
-    massCatapult: { cardId: 'mass-catapult-card', prefix: 'mass-catapult' },
-    iceCrystalExport: { cardId: 'ice-crystal-export-card', prefix: 'ice-crystal-export' },
-    ionDriveProbe: { cardId: 'ion-drive-probe-card', prefix: 'ion-drive-probe' },
-    solarObsPlatform: { cardId: 'solar-obs-platform-card', prefix: 'solar-obs-platform', req: 'docking' },
-    thermalResLab: { cardId: 'thermal-res-lab-card', prefix: 'thermal-res-lab' },
-    plasmaPhysicsLab: { cardId: 'plasma-physics-lab-card', prefix: 'plasma-physics-lab' },
-    dwarfPlanetResearch: { cardId: 'dwarf-planet-research-card', prefix: 'dwarf-planet-research' },
-    commNetRelayUnit: { cardId: 'comm-net-relay-card', prefix: 'comm-net-relay' }
+    rocket: { cardId: 'rocket-card', prefix: 'rocket', isClick: true, isRocket: true, title: '🚀 Rocket Launch (Click)', btnText: 'Add Moar Boosters!' },
+    miner: { cardId: 'miner-card', prefix: 'miner', title: '🚜 Mining Rig', yieldResource: 'funds', btnText: 'Build', multiplier: 'mining' },
+    scienceLab: { cardId: 'science-card', prefix: 'lab', title: '🔬 Science Laboratory', yieldResource: 'science', btnText: 'Build Lab', multiplier: 'commNet' },
+    touristHotel: { cardId: 'hotel-card', prefix: 'hotel', req: 'unlockTouristHotel', title: '🏨 Orbital Tourism Hotel', yieldResource: 'funds', btnText: 'Launch Module', multiplier: 'tourism' },
+    researchStation: { cardId: 'station-card', prefix: 'station', req: 'unlockResearchStation', title: '🛰️ Orbital Research Station', yieldResource: 'science', btnText: 'Launch Module' },
+    rover: { cardId: 'rover-card', prefix: 'rover', req: 'unlockRover', title: '🚙 Autonomous Science Rover', yieldResource: 'science', btnText: 'Launch Rover', multiplier: 'rover' },
+    he3Extractor: { cardId: 'he3-card', prefix: 'he3', req: 'unlockHe3', title: '🏭 Helium-3 Extractor', yieldResource: 'funds', btnText: 'Build' },
+    lkoFuelDepot: { cardId: 'lko-fuel-card', prefix: 'lko-fuel', req: 'docking', title: '⛽ LKO Fuel Station', yieldResource: 'funds', btnText: 'Build' },
+    telescopeObs: { cardId: 'telescope-card', prefix: 'telescope', title: '🔭 Telescope Observatory', yieldResource: 'science', btnText: 'Build Lab', multiplier: 'commNet' },
+    kerbalTraining: { cardId: 'training-card', prefix: 'training', title: '🏫 Kerbal Training Center', yieldResource: 'science', btnText: 'Build Center', multiplier: 'commNet' },
+    tourismShuttle: { cardId: 'tourism-shuttle-card', prefix: 'tourism-shuttle', title: '🚀 Tourism Shuttle', yieldResource: 'funds', btnText: 'Build' },
+    fuelRefinery: { cardId: 'fuel-refinery-card', prefix: 'fuel-refinery', title: '⛽ Fuel Refinery', yieldResource: 'funds', btnText: 'Build' },
+    regolithLab: { cardId: 'regolith-lab-card', prefix: 'regolith-lab', title: '🔬 Regolith Laboratory', yieldResource: 'science', btnText: 'Build Lab', multiplier: 'commNet' },
+    craterResearch: { cardId: 'crater-research-card', prefix: 'crater-research', title: '🏗️ Lunar Crater Research Base', yieldResource: 'science', btnText: 'Build Base', multiplier: 'commNet' },
+    mysteryGoo: { cardId: 'mystery-goo-card', prefix: 'mystery-goo', title: '🧪 MysteryGoo Surface Experiment', yieldResource: 'science', btnText: 'Deploy' },
+    iceExtractor: { cardId: 'ice-extractor-card', prefix: 'ice-extractor', title: '🧊 Ice Extractor', yieldResource: 'funds', btnText: 'Build' },
+    spaceElevator: { cardId: 'space-elevator-card', prefix: 'space-elevator', req: 'spaceElevatorTech', title: '🗼 Space Elevator', yieldResource: 'funds', btnText: 'Construct' },
+    parachuteProd: { cardId: 'parachute-prod-card', prefix: 'parachute-prod', title: '🪂 Parachute Production', yieldResource: 'funds', btnText: 'Build' },
+    highPressureLab: { cardId: 'high-pressure-lab-card', prefix: 'high-pressure-lab', title: '🔬 High-Pressure Atmosphere Lab', yieldResource: 'science', btnText: 'Build Lab', multiplier: 'commNet' },
+    gravioliDetector: { cardId: 'gravioli-detector-card', prefix: 'gravioli-detector', title: '📡 Gravioli Detector Surface Exp.', yieldResource: 'science', btnText: 'Deploy' },
+    colonyModule: { cardId: 'colony-module-card', prefix: 'colony-module', title: '🏡 Colony Habitation Module', yieldResource: 'funds', btnText: 'Build Module', multiplier: 'habitat' },
+    spaceyLifter: { cardId: 'spacey-lifter-card', prefix: 'spacey-lifter', title: '🚀 SpaceY Heavy Lifter', yieldResource: 'funds', btnText: 'Launch' },
+    fuelExport: { cardId: 'fuel-export-card', prefix: 'fuel-export', title: '⛽ Fuel Export Base', yieldResource: 'funds', btnText: 'Build Base' },
+    geologicLab: { cardId: 'geologic-lab-card', prefix: 'geologic-lab', title: '🔬 Geological Analysis Lab', yieldResource: 'science', btnText: 'Build Lab', multiplier: 'commNet' },
+    greenhouse: { cardId: 'greenhouse-card', prefix: 'greenhouse', title: '🌱 Greenhouse', yieldResource: 'science', btnText: 'Construct' },
+    cloudCityHotel: { cardId: 'cloud-city-card', prefix: 'cloud-city', title: '☁️ Cloud City Hotel', yieldResource: 'funds', btnText: 'Construct' },
+    floatingMiner: { cardId: 'floating-miner-card', prefix: 'floating-miner', title: '🎈 Floating Gas Miner', yieldResource: 'funds', btnText: 'Build' },
+    he4Extractor: { cardId: 'he4-card', prefix: 'he4', title: '🏭 Helium-4 Extractor', yieldResource: 'funds', btnText: 'Build' },
+    atmosphereScoop: { cardId: 'atmosphere-scoop-card', prefix: 'atmosphere-scoop', title: '🌬️ Atmosphere Scoop', yieldResource: 'funds', btnText: 'Build' },
+    sstoFreighter: { cardId: 'ssto-freighter-card', prefix: 'ssto-freighter', title: '✈️ SSTO Freighter', yieldResource: 'funds', btnText: 'Build' },
+    oceanResearch: { cardId: 'ocean-research-card', prefix: 'ocean-research', title: '🌊 Ocean Research Facility', yieldResource: 'science', btnText: 'Build Lab', multiplier: 'commNet' },
+    underwaterProbe: { cardId: 'underwater-probe-card', prefix: 'underwater-probe', title: '🚤 Underwater Probe', yieldResource: 'science', btnText: 'Launch' },
+    tidalStation: { cardId: 'tidal-station-card', prefix: 'tidal-station', title: '🌊 Tidal Power Station', yieldResource: 'funds', btnText: 'Build' },
+    xenoBioStation: { cardId: 'xeno-bio-card', prefix: 'xeno-bio', title: '🦠 Xeno-Biology Station', yieldResource: 'science', btnText: 'Build Lab', multiplier: 'commNet' },
+    supplyDepot: { cardId: 'supply-depot-card', prefix: 'supply-depot', title: '📦 Deep Space Supply Depot', yieldResource: 'funds', btnText: 'Build' },
+    exoticIceSale: { cardId: 'exotic-ice-card', prefix: 'exotic-ice', title: '💎 Exotic Ice Export', yieldResource: 'funds', btnText: 'Establish' },
+    deepIceDrill: { cardId: 'deep-ice-drill-card', prefix: 'deep-ice-drill', title: '🧊 Deep Ice Drill', yieldResource: 'funds', btnText: 'Build' },
+    cryoLab: { cardId: 'cryo-lab-card', prefix: 'cryo-lab', title: '❄️ Cryo-Laboratory', yieldResource: 'science', btnText: 'Build Lab', multiplier: 'commNet' },
+    longCryoLab: { cardId: 'long-cryo-lab-card', prefix: 'long-cryo-lab', title: '🛌 Long-Term Cryo Station', yieldResource: 'science', btnText: 'Build Station', multiplier: 'commNet' },
+    heatShieldProd: { cardId: 'heat-shield-prod-card', prefix: 'heat-shield-prod', title: '🛡️ Heat Shield Production', yieldResource: 'funds', btnText: 'Build' },
+    solarPowerPlant: { cardId: 'solar-power-plant-card', prefix: 'solar-power-plant', title: '☀️ Solar Power Plant', yieldResource: 'funds', btnText: 'Construct' },
+    lowGravOreTransporter: { cardId: 'low-grav-ore-transporter-card', prefix: 'low-grav-ore-transporter', title: '🪨 Low-G Ore Transporter', yieldResource: 'funds', btnText: 'Build' },
+    heavyLander: { cardId: 'heavy-lander-card', prefix: 'heavy-lander', title: '🛸 Heavy Lander', yieldResource: 'funds', btnText: 'Build' },
+    massCatapult: { cardId: 'mass-catapult-card', prefix: 'mass-catapult', title: '☄️ Mass Catapult', yieldResource: 'funds', btnText: 'Construct' },
+    iceCrystalExport: { cardId: 'ice-crystal-export-card', prefix: 'ice-crystal-export', title: '❄️ Ice Crystal Export', yieldResource: 'funds', btnText: 'Establish' },
+    ionDriveProbe: { cardId: 'ion-drive-probe-card', prefix: 'ion-drive-probe', title: '🛰️ Ion Drive Probe', yieldResource: 'science', btnText: 'Launch' },
+    solarObsPlatform: { cardId: 'solar-obs-platform-card', prefix: 'solar-obs-platform', req: 'docking', title: '🔭 Solar Observation Platform', yieldResource: 'science', btnText: 'Construct', multiplier: 'commNet' },
+    thermalResLab: { cardId: 'thermal-res-lab-card', prefix: 'thermal-res-lab', title: '🌡️ Thermal Research Lab', yieldResource: 'science', btnText: 'Build Lab', multiplier: 'commNet' },
+    plasmaPhysicsLab: { cardId: 'plasma-physics-lab-card', prefix: 'plasma-physics-lab', title: '⚡ Plasma Physics Lab', yieldResource: 'science', btnText: 'Build Lab', multiplier: 'commNet' },
+    dwarfPlanetResearch: { cardId: 'dwarf-planet-research-card', prefix: 'dwarf-planet-research', title: '🪐 Dwarf Planet Research', yieldResource: 'science', btnText: 'Build Base', multiplier: 'commNet' },
+    commNetRelayUnit: { cardId: 'comm-net-relay-card', prefix: 'comm-net-relay', title: '📡 CommNet Relay', yieldResource: 'science', btnText: 'Build Unit', multiplier: 'commNet' }
 };
+
+function getUnitMultiplier(unitKey) {
+    const mapping = unitDOMMapping[unitKey];
+    if (!mapping) return 1;
+
+    const multType = mapping.multiplier;
+    if (!multType) return 1;
+
+    if (multType === 'mining' && gameData.upgrades.efficientMiners.unlocked) return 1.5;
+    if (multType === 'tourism' && gameData.upgrades.publicRelations.unlocked) return 2;
+    if (multType === 'commNet' && gameData.upgrades.commNetRelay.unlocked) return 1.5;
+    if (multType === 'habitat' && gameData.upgrades.inflatableHabitats.unlocked) return 2;
+    
+    if (multType === 'rover') {
+        let mult = 1;
+        if (gameData.upgrades.advancedAvionics.unlocked) mult *= 1.2;
+        if (gameData.upgrades.scanSatMapping.unlocked) mult *= 2.0;
+        return mult;
+    }
+
+    return 1;
+}
 
 const gameData = {
     funds: 0, 

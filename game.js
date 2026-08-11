@@ -170,88 +170,49 @@ let floatTextTimer = 0;
 function recalculateCache() {
     let totalInc = 0;
     let totalSci = 0;
-
-    const minerMult = gameData.upgrades.efficientMiners.unlocked ? 1.5 : 1;
     const globalMult = gameData.upgrades.kerbalKonstructs.unlocked ? 2 : 1;
-    const prMult = gameData.upgrades.publicRelations.unlocked ? 2 : 1;
-    const commMult = gameData.upgrades.commNetRelay.unlocked ? 1.5 : 1;
     const flagMult = gameData.upgrades.improvedFlagMaterial.unlocked ? 1.1 : 1;
-    const avionicsMult = gameData.upgrades.advancedAvionics.unlocked ? 1.2 : 1;
-    const scanSatMult = gameData.upgrades.scanSatMapping.unlocked ? 2.0 : 1;
-    const roverMult = avionicsMult * scanSatMult;
-    const habitatMult = gameData.upgrades.inflatableHabitats.unlocked ? 2 : 1;
-
+    
     for (const pKey in gameData.planets) {
         const p = gameData.planets[pKey];
         p.cachedIncome = 0;
         p.cachedScience = 0;
-
         if (!p.unlocked) continue;
-
+        
         let pIncome = 0;
         let pScience = 0;
-
-        if (pKey === 'kerbin' && gameData.upgrades.mechJeb.unlocked) pIncome += getClickValue('kerbin');
-
-        if (p.units.miner) pIncome += p.units.miner.owned * (p.units.miner.basePower * minerMult);
-        if (p.units.touristHotel) pIncome += p.units.touristHotel.owned * (p.units.touristHotel.basePower * prMult);
-        if (p.units.he3Extractor) pIncome += p.units.he3Extractor.owned * p.units.he3Extractor.basePower;
-        if (p.units.lkoFuelDepot) pIncome += p.units.lkoFuelDepot.owned * p.units.lkoFuelDepot.basePower;
-        if (p.units.iceExtractor) pIncome += p.units.iceExtractor.owned * p.units.iceExtractor.basePower;
-        if (p.units.spaceElevator) pIncome += p.units.spaceElevator.owned * p.units.spaceElevator.basePower;
-        if (p.units.parachuteProd) pIncome += p.units.parachuteProd.owned * p.units.parachuteProd.basePower;
-        if (p.units.cloudCityHotel) pIncome += p.units.cloudCityHotel.owned * p.units.cloudCityHotel.basePower;
-        if (p.units.floatingMiner) pIncome += p.units.floatingMiner.owned * p.units.floatingMiner.basePower;
-        if (p.units.he4Extractor) pIncome += p.units.he4Extractor.owned * p.units.he4Extractor.basePower;
-        if (p.units.sstoFreighter) pIncome += p.units.sstoFreighter.owned * p.units.sstoFreighter.basePower;
-        if (p.units.colonyModule) pIncome += p.units.colonyModule.owned * (p.units.colonyModule.basePower * habitatMult);
-        if (p.units.spaceyLifter) pIncome += p.units.spaceyLifter.owned * p.units.spaceyLifter.basePower;
-        if (p.units.fuelExport) pIncome += p.units.fuelExport.owned * p.units.fuelExport.basePower;
-        if (p.units.tourismShuttle) pIncome += p.units.tourismShuttle.owned * p.units.tourismShuttle.basePower;
-        if (p.units.fuelRefinery) pIncome += p.units.fuelRefinery.owned * p.units.fuelRefinery.basePower;
-        if (p.units.supplyDepot) pIncome += p.units.supplyDepot.owned * p.units.supplyDepot.basePower;
-        if (p.units.exoticIceSale) pIncome += p.units.exoticIceSale.owned * p.units.exoticIceSale.basePower;
-        if (p.units.deepIceDrill) pIncome += p.units.deepIceDrill.owned * p.units.deepIceDrill.basePower;
-        if (p.units.heatShieldProd) pIncome += p.units.heatShieldProd.owned * p.units.heatShieldProd.basePower;
-        if (p.units.solarPowerPlant) pIncome += p.units.solarPowerPlant.owned * p.units.solarPowerPlant.basePower;
-        if (p.units.lowGravOreTransporter) pIncome += p.units.lowGravOreTransporter.owned * p.units.lowGravOreTransporter.basePower;
-        if (p.units.heavyLander) pIncome += p.units.heavyLander.owned * p.units.heavyLander.basePower;
-        if (p.units.massCatapult) pIncome += p.units.massCatapult.owned * p.units.massCatapult.basePower;
-        if (p.units.iceCrystalExport) pIncome += p.units.iceCrystalExport.owned * p.units.iceCrystalExport.basePower;
-
-        if (p.units.scienceLab) pScience += p.units.scienceLab.owned * (p.units.scienceLab.basePower * commMult);
-        if (p.units.rover) pScience += p.units.rover.owned * (p.units.rover.basePower * roverMult);
-        if (p.units.researchStation) pScience += p.units.researchStation.owned * p.units.researchStation.basePower;
-        if (p.units.telescopeObs) pScience += p.units.telescopeObs.owned * (p.units.telescopeObs.basePower * commMult);
-        if (p.units.kerbalTraining) pScience += p.units.kerbalTraining.owned * (p.units.kerbalTraining.basePower * commMult);
-        if (p.units.regolithLab) pScience += p.units.regolithLab.owned * (p.units.regolithLab.basePower * commMult);
-        if (p.units.craterResearch) pScience += p.units.craterResearch.owned * (p.units.craterResearch.basePower * commMult);
-        if (p.units.mysteryGoo) pScience += p.units.mysteryGoo.owned * p.units.mysteryGoo.basePower;
-        if (p.units.highPressureLab) pScience += p.units.highPressureLab.owned * (p.units.highPressureLab.basePower * commMult);
-        if (p.units.gravioliDetector) pScience += p.units.gravioliDetector.owned * p.units.gravioliDetector.basePower;
-        if (p.units.oceanResearch) pScience += p.units.oceanResearch.owned * (p.units.oceanResearch.basePower * commMult);
-        if (p.units.underwaterProbe) pScience += p.units.underwaterProbe.owned * p.units.underwaterProbe.basePower;
-        if (p.units.tidalStation) pScience += p.units.tidalStation.owned * p.units.tidalStation.basePower;
-        if (p.units.xenoBioStation) pScience += p.units.xenoBioStation.owned * (p.units.xenoBioStation.basePower * commMult);
-        if (p.units.cryoLab) pScience += p.units.cryoLab.owned * (p.units.cryoLab.basePower * commMult);
-        if (p.units.longCryoLab) pScience += p.units.longCryoLab.owned * (p.units.longCryoLab.basePower * commMult);
-        if (p.units.geologicLab) pScience += p.units.geologicLab.owned * (p.units.geologicLab.basePower * commMult);
-        if (p.units.greenhouse) pScience += p.units.greenhouse.owned * p.units.greenhouse.basePower;
-        if (p.units.atmosphereScoop) pScience += p.units.atmosphereScoop.owned * p.units.atmosphereScoop.basePower;
-        if (p.units.ionDriveProbe) pScience += p.units.ionDriveProbe.owned * p.units.ionDriveProbe.basePower;
-        if (p.units.solarObsPlatform) pScience += p.units.solarObsPlatform.owned * (p.units.solarObsPlatform.basePower * commMult);
-        if (p.units.thermalResLab) pScience += p.units.thermalResLab.owned * (p.units.thermalResLab.basePower * commMult);
-        if (p.units.plasmaPhysicsLab) pScience += p.units.plasmaPhysicsLab.owned * (p.units.plasmaPhysicsLab.basePower * commMult);
-        if (p.units.dwarfPlanetResearch) pScience += p.units.dwarfPlanetResearch.owned * (p.units.dwarfPlanetResearch.basePower * commMult);
-        if (p.units.commNetRelayUnit) pScience += p.units.commNetRelayUnit.owned * (p.units.commNetRelayUnit.basePower * commMult);
+        
+        if (pKey === 'kerbin' && gameData.upgrades.mechJeb.unlocked) {
+            pIncome += getClickValue('kerbin');
+        }
+        
+        for (const uKey in p.units) {
+            const unit = p.units[uKey];
+            if (!unit || unit.owned === 0) continue;
+            
+            const mapping = unitDOMMapping[uKey];
+            if (!mapping) continue;
+            
+            const unitMult = getUnitMultiplier(uKey);
+            const yieldAmount = unit.owned * unit.basePower * unitMult;
+            
+            if (mapping.yieldResource === 'funds') {
+                pIncome += yieldAmount;
+                continue;
+            }
+            
+            if (mapping.yieldResource === 'science') {
+                pScience += yieldAmount;
+                continue;
+            }
+        }
         
         p.cachedIncome = pIncome;
         p.cachedScience = pScience;
-
         totalInc += pIncome;
         totalSci += pScience;
     }
-
+    
     gameData.cachedTotalIncome = Math.floor(totalInc * globalMult * flagMult);
     gameData.cachedTotalScience = Math.floor(totalSci * flagMult);
 }
@@ -914,7 +875,15 @@ if (mapControls) mapControls.addEventListener('mousedown', (e) => e.stopPropagat
 const topUiLayer = document.getElementById('top-ui-layer');
 if (topUiLayer) topUiLayer.addEventListener('mousedown', (e) => e.stopPropagation());
 
-document.getElementById('btn-click').addEventListener('click', manualClick);
+if (typeof generateUnitCards === 'function') {
+    generateUnitCards();
+}
+
+const btnClick = document.getElementById('btn-click');
+if (btnClick) {
+    btnClick.addEventListener('click', manualClick);
+}
+
 document.getElementById('btn-unlock').addEventListener('click', unlockSelectedPlanet);
 document.getElementById('btn-reset').addEventListener('click', resetGame);
 document.getElementById('btn-rnd').addEventListener('click', toggleRndModal);
@@ -929,6 +898,7 @@ document.getElementById('btn-transfer-fail-confirm')?.addEventListener('click', 
     if (!btn) return;
     btn.addEventListener('click', () => buyRocketUpgrade(comp));
 });
+
 
 document.addEventListener('click', (e) => {
     const btn = e.target.closest('button');
@@ -946,29 +916,14 @@ document.addEventListener('click', (e) => {
     playSFX(sfxClick);
 });
 
-['rocket', 'miner', 'lab', 'hotel', 'station', 'rover', 'he3', 'lko-fuel', 'telescope', 'training', 'tourism-shuttle', 'fuel-refinery', 'regolith-lab', 'crater-research', 'mystery-goo', 'ice-extractor', 'space-elevator', 'parachute-prod', 'high-pressure-lab', 'gravioli-detector', 'colony-module', 'spacey-lifter', 'fuel-export', 'geologic-lab', 'greenhouse', 'cloud-city', 'floating-miner', 'he4', 'atmosphere-scoop', 'ssto-freighter', 'ocean-research', 'underwater-probe', 'tidal-station', 'xeno-bio', 'supply-depot', 'exotic-ice', 'deep-ice-drill', 'cryo-lab', 'long-cryo-lab', 'heat-shield-prod', 'solar-power-plant', 'low-grav-ore-transporter', 'heavy-lander', 'mass-catapult', 'ice-crystal-export', 'ion-drive-probe', 'solar-obs-platform', 'thermal-res-lab', 'plasma-physics-lab', 'dwarf-planet-research', 'comm-net-relay'].forEach(prefix => {
-    const unitKeyMap = { 
-        lab: 'scienceLab', hotel: 'touristHotel', station: 'researchStation', he3: 'he3Extractor',
-        'lko-fuel': 'lkoFuelDepot', telescope: 'telescopeObs', training: 'kerbalTraining',
-        'tourism-shuttle': 'tourismShuttle', 'fuel-refinery': 'fuelRefinery', 'regolith-lab': 'regolithLab',
-        'crater-research': 'craterResearch', 'mystery-goo': 'mysteryGoo', 'ice-extractor': 'iceExtractor',
-        'space-elevator': 'spaceElevator', 'parachute-prod': 'parachuteProd', 'high-pressure-lab': 'highPressureLab',
-        'gravioli-detector': 'gravioliDetector', 'colony-module': 'colonyModule', 'spacey-lifter': 'spaceyLifter',
-        'fuel-export': 'fuelExport', 'geologic-lab': 'geologicLab', greenhouse: 'greenhouse',
-        'cloud-city': 'cloudCityHotel', 'floating-miner': 'floatingMiner', he4: 'he4Extractor',
-        'atmosphere-scoop': 'atmosphereScoop', 'ssto-freighter': 'sstoFreighter', 'ocean-research': 'oceanResearch',
-        'underwater-probe': 'underwaterProbe', 'tidal-station': 'tidalStation', 'xeno-bio': 'xenoBioStation',
-        'supply-depot': 'supplyDepot', 'exotic-ice': 'exoticIceSale', 'deep-ice-drill': 'deepIceDrill',
-        'cryo-lab': 'cryoLab', 'long-cryo-lab': 'longCryoLab', 'heat-shield-prod': 'heatShieldProd',
-        'solar-power-plant': 'solarPowerPlant', 'low-grav-ore-transporter': 'lowGravOreTransporter',
-        'heavy-lander': 'heavyLander', 'mass-catapult': 'massCatapult', 'ice-crystal-export': 'iceCrystalExport',
-        'ion-drive-probe': 'ionDriveProbe', 'solar-obs-platform': 'solarObsPlatform',
-        'thermal-res-lab': 'thermalResLab', 'plasma-physics-lab': 'plasmaPhysicsLab',
-        'dwarf-planet-research': 'dwarfPlanetResearch', 'comm-net-relay': 'commNetRelayUnit'
-    };
-    const btn = document.getElementById(`btn-buy-${prefix}`);
-    if(btn) btn.addEventListener('click', () => buyUnit(unitKeyMap[prefix] || prefix));
-});
+for (const unitKey in unitDOMMapping) {
+    const unitData = unitDOMMapping[unitKey];
+    const btn = document.getElementById(`btn-buy-${unitData.prefix}`);
+    
+    if (!btn) continue; 
+    
+    btn.addEventListener('click', () => buyUnit(unitKey));
+}
 
 document.getElementById('btn-close-warp-upgrade')?.addEventListener('click', hideWarpUpgradeModal);
 document.getElementById('btn-cancel-warp-upgrade')?.addEventListener('click', hideWarpUpgradeModal);
