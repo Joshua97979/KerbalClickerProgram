@@ -697,6 +697,7 @@ h2 { padding-bottom: 10px; margin-bottom: 10px; }
 	margin-top: 6px;
     white-space: nowrap;
     pointer-events: none;
+	user-select: none;
 }
 .sun-label { top: auto; bottom: -22px; transform-origin: bottom center;}
 
@@ -713,6 +714,7 @@ h2 { padding-bottom: 10px; margin-bottom: 10px; }
     animation: floatUpAndFade 0.8s ease-out forwards;
     white-space: nowrap;
     z-index: 100;
+	user-select: none;
 }
 
 @keyframes floatUpAndFade {
