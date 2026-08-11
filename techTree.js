@@ -111,16 +111,21 @@ function renderUpgrades() {
     const rndScienceDisplay = document.getElementById('rnd-science-display');
     if (rndScienceDisplay) rndScienceDisplay.innerHTML = `(Current: ${formatNumber(gameData.science)} ${ICON_SCI})`;
 
-    let dummy = document.getElementById('dummy-rover-he3');
-    if (!dummy) {
-        dummy = document.createElement('div');
-        dummy.id = 'dummy-rover-he3';
-        dummy.className = 'upgrade-card'; 
-        dummy.style.gridColumn = 4;
-        dummy.style.gridRow = 3;
-        dummy.style.visibility = 'hidden';
-        dummy.style.pointerEvents = 'none';
-        canvas.appendChild(dummy);
+    // Dynamische Dummys generieren (Flache Hierarchie mit Invertierung)
+    if (gameData.techDummies) {
+        for (const dummyData of gameData.techDummies) {
+            let dummy = document.getElementById(dummyData.id);
+            if (dummy) continue;
+
+            dummy = document.createElement('div');
+            dummy.id = dummyData.id;
+            dummy.className = 'upgrade-card'; 
+            dummy.style.gridColumn = dummyData.tier;
+            dummy.style.gridRow = dummyData.row;
+            dummy.style.visibility = 'hidden';
+            dummy.style.pointerEvents = 'none';
+            canvas.appendChild(dummy);
+        }
     }
 
     for (const key in gameData.upgrades) {
@@ -215,17 +220,19 @@ function drawTechLines() {
             const endY = tRect.top - canvasRect.top + (tRect.height / 2);
 
             let d = '';
-            if (key === 'unlockHe3' && reqKey === 'unlockRover') {
-                const dummyCard = document.getElementById('dummy-rover-he3');
-                if (dummyCard) {
-                    const dRect = dummyCard.getBoundingClientRect();
-                    const dummyInX = dRect.left - canvasRect.left;
-                    const dummyOutX = dRect.right - canvasRect.left;
-                    const dummyY = dRect.top - canvasRect.top + (dRect.height / 2);
-                    const midX1 = startX + (dummyInX - startX) / 2;
-                    const midX2 = dummyOutX + (endX - dummyOutX) / 2;
-                    d = `M ${startX} ${startY} C ${midX1} ${startY}, ${midX1} ${dummyY}, ${dummyInX} ${dummyY} L ${dummyOutX} ${dummyY} C ${midX2} ${dummyY}, ${midX2} ${endY}, ${endX} ${endY}`;
-                }
+            
+            // Generische Prüfung, ob ein Dummy für diese spezifische Verbindung existiert
+            const dummyData = gameData.techDummies ? gameData.techDummies.find(dum => dum.target === key && dum.source === reqKey) : null;
+            const dummyCard = dummyData ? document.getElementById(dummyData.id) : null;
+
+            if (dummyCard) {
+                const dRect = dummyCard.getBoundingClientRect();
+                const dummyInX = dRect.left - canvasRect.left;
+                const dummyOutX = dRect.right - canvasRect.left;
+                const dummyY = dRect.top - canvasRect.top + (dRect.height / 2);
+                const midX1 = startX + (dummyInX - startX) / 2;
+                const midX2 = dummyOutX + (endX - dummyOutX) / 2;
+                d = `M ${startX} ${startY} C ${midX1} ${startY}, ${midX1} ${dummyY}, ${dummyInX} ${dummyY} L ${dummyOutX} ${dummyY} C ${midX2} ${dummyY}, ${midX2} ${endY}, ${endX} ${endY}`;
             }
 
             if (!d) {

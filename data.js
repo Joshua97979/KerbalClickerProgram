@@ -97,6 +97,9 @@ const gameData = {
     completedContracts: [],
 	cachedTotalIncome: 0,
     cachedTotalScience: 0,
+	techDummies: [
+        { id: 'dummy-rover-he3', source: 'unlockRover', target: 'unlockHe3', tier: 4, row: 3 },
+    ],
     upgrades: {
         rocketTech: { id: 'rocketTech', name: 'Solid Rocket Boosters', cost: 25, unlocked: false, desc: 'Doubles the click value on Kerbin', tier: 1, row: 3, req: [] },
 		efficientMiners: { id: 'efficientMiners', name: 'Optimized Drills', cost: 10, unlocked: false, desc: 'Increases yield of all mining vehicles by +50%', tier: 2, row: 3, req: ['rocketTech'] },
@@ -119,7 +122,7 @@ const gameData = {
 		spaceElevatorTech: { id: 'spaceElevatorTech', name: 'Space Elevator', cost: 20000, unlocked: false, desc: 'A massive orbital tether. Unlocks the Space Elevator on Kerbin and Eve.', tier: 8, row: 1, req: ['aerocapture'] },																																																							 
         rapierEngine: { id: 'rapierEngine', name: 'R.A.P.I.E.R. Engine', cost: 25000, unlocked: false, desc: 'Hybrid propulsion system. Necessary for travel to Laythe.', tier: 8, row: 2, req: ['aerocapture'] },
         rtg: { id: 'rtg', name: 'Radioisotope Thermoelectric Generator', cost: 30000, unlocked: false, desc: 'Reliable deep space power. Necessary for travel to Eeloo.', tier: 8, row: 4, req: ['aerocapture'] },
-        krakenDrive: { id: 'krakenDrive', name: 'Kraken Drive', cost: 100000, unlocked: false, desc: 'Experimental spacetime manipulation. Increases the last warp level from x20 to x22.', tier: 9, row: 3, req: ['rtg'] },
+        krakenDrive: { id: 'krakenDrive', name: 'Kraken Drive', cost: 100000, unlocked: false, desc: 'Experimental spacetime manipulation. Increases the last warp level from x20 to x22.', tier: 11, row: 3, req: ['rtg'] },
 		launchAbortSystem: { id: 'launchAbortSystem', name: 'Launch Abort System', cost: 50, unlocked: false, desc: 'Safety first! Doubles the yield of a manual click.', tier: 2, row: 1, req: ['rocketTech'] },
         improvedFlagMaterial: { id: 'improvedFlagMaterial', name: 'Improved Flag Material', cost: 800, unlocked: false, desc: 'Better flags inspire everyone. Grants a +10% boost to global Funds and Science income.', tier: 4, row: 1, req: ['mechJeb'] },
         advancedAvionics: { id: 'advancedAvionics', name: 'Advanced Avionics', cost: 1200, unlocked: false, desc: 'Smarter driving software. All Rovers generate +20% Science.', tier: 4, row: 2, req: ['unlockRover'] },
