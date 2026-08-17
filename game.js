@@ -615,11 +615,11 @@ function manualClick() {
     if (gameData.upgrades.mechJeb.unlocked) return;
     
     const now = Date.now();
-	const currentWarpMult = getWarpMultiplier(currentWarpIndex);
-	// Skaliert den Cooldown antiproportional zum Warp, damit man mit Time-Warp schneller klicken kann
+    const currentWarpMult = getWarpMultiplier(currentWarpIndex);
+    // Skaliert den Cooldown antiproportional zum Warp, damit man mit Time-Warp schneller klicken kann
     const adjustedCooldown = BASE_CLICK_COOLDOWN_MS / Math.max(1, currentWarpMult);
 
-	if (now - lastClick < adjustedCooldown) return;
+    if (now - lastClick < adjustedCooldown) return;
     lastClick = now;
     
     const pId = 'kerbin';
@@ -809,12 +809,15 @@ function gameLoop(currentTime) {
 
 function saveGame() { 
     if (isResetting) return;
+    if (typeof Tutorial !== 'undefined' && Tutorial.active) return;
+
     const dataToSave = { ...gameData, mapScale: mapScale };
     localStorage.setItem('kspIdleSave', JSON.stringify(dataToSave)); 
 }
 
 function loadGame() {
     const saved = localStorage.getItem('kspIdleSave');
+    if (!saved && typeof Tutorial !== 'undefined') Tutorial.showPrompt();
     if (!saved) return;
     
     const loadedData = JSON.parse(saved);
@@ -849,8 +852,8 @@ function loadGame() {
         if (!loadedData.planets[pKey]) continue;
         
         gameData.planets[pKey].unlocked = !!loadedData.planets[pKey].unlocked;
-		
-		gameData.planets[pKey].rocketUpgrades = { a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 };
+        
+        gameData.planets[pKey].rocketUpgrades = { a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 };
         
         gameData.planets[pKey].isUnlocking = !!loadedData.planets[pKey].isUnlocking;
         gameData.planets[pKey].hasFailed = !!loadedData.planets[pKey].hasFailed;
@@ -901,10 +904,10 @@ if (typeof generateUnitCards === 'function') {
 const btnClick = document.getElementById('btn-click');
 if (btnClick) {
     btnClick.addEventListener('click', manualClick);
-																										
-								   
-					  
+						  
+		   
 	   
+	
 }
 
 document.getElementById('btn-unlock').addEventListener('click', unlockSelectedPlanet);
@@ -1093,20 +1096,15 @@ const helpModal = document.getElementById('help-modal');
 const btnStartTutorial = document.getElementById('btn-start-tutorial');
 if (btnStartTutorial) {
     btnStartTutorial.addEventListener('click', () => {
-        console.log('Start Tutorial Tour');
+        if (typeof Tutorial !== 'undefined' && Tutorial.active) return;
+        
         toggleHelpMenu();
+        if (typeof Tutorial !== 'undefined') Tutorial.start();
     });
 }
 
 setInterval(() => { if (!isPaused) saveGame(); }, 5000);
 window.addEventListener('beforeunload', saveGame);
-
-loadGame();
-initLabelsSetting();
-updateHeader();
-
-if (!gameData.selectedPlanet) gameData.selectedPlanet = 'kerbol';
-cameraTarget = gameData.selectedPlanet;
 
 const tooltipEl = document.createElement('div');
 tooltipEl.id = 'planet-tooltip';
@@ -1373,13 +1371,23 @@ document.addEventListener('visibilitychange', () => {
     }
 });
 
-updateMapDimensions();
-requestAnimationFrame(gameLoop);
-updatePanel();
-updateApsisMarkers();
-updateOrbitHighlight();
-setWarpIndex(0);
-updatePlanetsPositions();
-updateMapTransform();
-updateMusicIcons();
-updateSoundIcons();
+
+document.addEventListener('DOMContentLoaded', () => {
+	loadGame();
+	initLabelsSetting();
+	updateHeader();
+
+	if (!gameData.selectedPlanet) gameData.selectedPlanet = 'kerbol';
+	cameraTarget = gameData.selectedPlanet;
+	
+	updateMapDimensions();
+	requestAnimationFrame(gameLoop);
+	updatePanel();
+	updateApsisMarkers();
+	updateOrbitHighlight();
+	setWarpIndex(0);
+	updatePlanetsPositions();
+	updateMapTransform();
+	updateMusicIcons();
+	updateSoundIcons();
+});
