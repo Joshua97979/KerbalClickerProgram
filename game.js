@@ -170,8 +170,16 @@ let floatTextTimer = 0;
 function recalculateCache() {
     let totalInc = 0;
     let totalSci = 0;
-    const globalMult = gameData.upgrades.kerbalKonstructs.unlocked ? 2 : 1;
-    const flagMult = gameData.upgrades.improvedFlagMaterial.unlocked ? 1.1 : 1;
+    
+    // CommNet generiert global +5% Science per erfolgreich freigeschaltetem Planet
+    let commNetBonus = 1;
+    if (gameData.upgrades.commNet && gameData.upgrades.commNet.unlocked) {
+        let unlockedCount = 0;
+        for (const key in gameData.planets) {
+            if (gameData.planets[key].unlocked) unlockedCount++;
+        }
+        commNetBonus = 1 + (unlockedCount * 0.05);
+    }
     
     for (const pKey in gameData.planets) {
         const p = gameData.planets[pKey];
@@ -213,8 +221,8 @@ function recalculateCache() {
         totalSci += pScience;
     }
     
-    gameData.cachedTotalIncome = Math.floor(totalInc * globalMult * flagMult);
-    gameData.cachedTotalScience = Math.floor(totalSci * flagMult);
+    gameData.cachedTotalIncome = Math.floor(totalInc);
+    gameData.cachedTotalScience = Math.floor(totalSci * commNetBonus);
 }
 
 function setCameraTarget(targetId) {
@@ -269,10 +277,9 @@ function getCost(planetId, unitKey, amount = 1) {
     
     let totalCost = 0;
     let currentOwned = unit.owned;
-    const discount = (planetId === 'mun' && gameData.upgrades.munTransferStation.unlocked) ? 0.8 : 1.0;
     
     for (let i = 0; i < amount; i++) {
-        totalCost += Math.floor((unit.baseCost * discount) * Math.pow(unit.costMult, currentOwned));
+        totalCost += Math.floor(unit.baseCost * Math.pow(unit.costMult, currentOwned));
         currentOwned++;
     }
     
@@ -286,12 +293,11 @@ function getMaxAffordable(planetId, unitKey) {
     let maxAmount = 0;
     let totalCost = 0;
     let currentOwned = unit.owned;
-    const discount = (planetId === 'mun' && gameData.upgrades.munTransferStation.unlocked) ? 0.8 : 1.0;
     
     while (true) {
         if (currentOwned >= unit.max) break;
         
-        const nextCost = Math.floor((unit.baseCost * discount) * Math.pow(unit.costMult, currentOwned));
+        const nextCost = Math.floor(unit.baseCost * Math.pow(unit.costMult, currentOwned));
         if (totalCost + nextCost > gameData.funds) break;
         
         totalCost += nextCost;
@@ -314,10 +320,9 @@ function getClickValue(planetId) {
     const rocket = gameData.planets[planetId]?.units?.rocket;
     if (!rocket) return 0;
     
-    const clickMult = gameData.upgrades.rocketTech.unlocked ? 2 : 1;
     const abortMult = gameData.upgrades.launchAbortSystem.unlocked ? 2 : 1;
     
-    return rocket.owned * rocket.basePower * clickMult * abortMult;
+    return rocket.owned * rocket.basePower * abortMult;
 }
 
 function claimContract(contractId) {
@@ -489,11 +494,20 @@ function getTransferChance(planetId) {
     }
     
     const base = p.baseTransferChance || 0.15;
-    // Max Level sind 30 (6 Upgrades * 5 Level). Wir füllen die Differenz bis 1.0 (100%) auf.
-    const maxBonus = 1.0 - base;
-    const bonusPerLevel = maxBonus / 30;
     
-    return base + (totalUpgrades * bonusPerLevel);
+    // Valentina's Coffee Bonus
+    let coffeeBonus = 0;
+    if (gameData.upgrades.valentinasCoffee && gameData.upgrades.valentinasCoffee.unlocked) {
+        coffeeBonus = 0.10; 
+    }
+    
+    const maxLevelPerComponent = (gameData.upgrades.veryHeavyRocketry && gameData.upgrades.veryHeavyRocketry.unlocked) ? 10 : 5;
+    const maxTotalUpgrades = 6 * maxLevelPerComponent;
+    
+    const maxBonus = 1.0 - base;
+    const bonusPerLevel = maxBonus / maxTotalUpgrades;
+    
+    return base + coffeeBonus + (totalUpgrades * bonusPerLevel);
 }
 
 function getRocketUpgradeCost(planetId, comp) {
@@ -502,11 +516,18 @@ function getRocketUpgradeCost(planetId, comp) {
     if (!p.rocketUpgrades) return 0;
     
     const currentLevel = p.rocketUpgrades[comp];
-    if (currentLevel >= 5) return 0;
+    const maxLevel = (gameData.upgrades.veryHeavyRocketry && gameData.upgrades.veryHeavyRocketry.unlocked) ? 10 : 5;
+    if (currentLevel >= maxLevel) return 0;
     
     const baseCost = p.rocketUpgradeBaseCost || 1000;
-    // Preis skaliert mit Faktor 1.8 pro Level
-    return Math.floor(baseCost * Math.pow(1.8, currentLevel));
+    let cost = Math.floor(baseCost * Math.pow(1.8, currentLevel));
+    
+    // Struts and Boosters Rabatt
+    if (gameData.upgrades.strutsAndBoosters && gameData.upgrades.strutsAndBoosters.unlocked) {
+        cost = Math.floor(cost * 0.5);
+    }
+    
+    return cost;
 }
 
 function buyRocketUpgrade(comp) {
@@ -517,8 +538,9 @@ function buyRocketUpgrade(comp) {
     if (!p) return;
     if (!p.rocketUpgrades) return;
 
+    const maxLevel = (gameData.upgrades.veryHeavyRocketry && gameData.upgrades.veryHeavyRocketry.unlocked) ? 10 : 5;
     const lvl = p.rocketUpgrades[comp];
-    if (lvl >= 5) return;
+    if (lvl >= maxLevel) return;
 
     const cost = getRocketUpgradeCost(pId, comp);
     if (gameData.funds < cost) return;
@@ -528,7 +550,6 @@ function buyRocketUpgrade(comp) {
     
     updateHeader();
     if (typeof updatePanel === 'function') updatePanel();
-    // updateRocketUpgradesUI() wird dann in der ui.js implementiert
     if (typeof updateRocketUpgradesUI === 'function') updateRocketUpgradesUI();
     saveGame();
 }
@@ -550,6 +571,7 @@ function unlockSelectedPlanet() {
     planet.hasFailed = false;
     planet.unlockProgress = 0;
     planet.failProgress = null;
+    gameData.hasLaunchedRocket = true;
 
     planet.transferStartPos = getRelativePos('wrapper-kerbin');
 
@@ -586,14 +608,18 @@ function confirmTransferFail() {
 }
 
 let lastClick = 0;
-const CLICK_COOLDOWN_MS = 200;
+const BASE_CLICK_COOLDOWN_MS = 200;
 
 function manualClick() {
     if (isPaused) return;
     if (gameData.upgrades.mechJeb.unlocked) return;
     
     const now = Date.now();
-    if (now - lastClick < CLICK_COOLDOWN_MS) return;
+	const currentWarpMult = getWarpMultiplier(currentWarpIndex);
+	// Skaliert den Cooldown antiproportional zum Warp, damit man mit Time-Warp schneller klicken kann
+    const adjustedCooldown = BASE_CLICK_COOLDOWN_MS / Math.max(1, currentWarpMult);
+
+	if (now - lastClick < adjustedCooldown) return;
     lastClick = now;
     
     const pId = 'kerbin';
@@ -771,7 +797,7 @@ function gameLoop(currentTime) {
 
     floatTextTimer += effectiveTime;
     if (floatTextTimer >= 1.0) {
-        const globalMult = gameData.upgrades.kerbalKonstructs.unlocked ? 2 : 1;
+        const globalMult = 1;
         spawnFloatingTexts(globalMult);
         floatTextTimer %= 1.0;
     }
@@ -793,7 +819,7 @@ function loadGame() {
     
     const loadedData = JSON.parse(saved);
 
-    const keysToLoad = ['funds', 'totalFundsEarned', 'science', 'missionTime', 'selectedPlanet', 'totalScienceEarned', 'maxWarpUnlocked', 'settings'];
+    const keysToLoad = ['funds', 'totalFundsEarned', 'science', 'missionTime', 'selectedPlanet', 'totalScienceEarned', 'maxWarpUnlocked', 'settings', 'asteroidsCaught', 'hasLaunchedRocket'];
     keysToLoad.forEach(key => {
         if (loadedData[key] !== undefined) gameData[key] = loadedData[key];
     });
@@ -824,12 +850,7 @@ function loadGame() {
         
         gameData.planets[pKey].unlocked = !!loadedData.planets[pKey].unlocked;
 		
-		// Fallback für ältere Saves, die noch keine Upgrades haben
-        if (loadedData.planets[pKey].rocketUpgrades) {
-            gameData.planets[pKey].rocketUpgrades = loadedData.planets[pKey].rocketUpgrades;
-        } else {
-            gameData.planets[pKey].rocketUpgrades = { a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 };
-        }
+		gameData.planets[pKey].rocketUpgrades = { a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 };
         
         gameData.planets[pKey].isUnlocking = !!loadedData.planets[pKey].isUnlocking;
         gameData.planets[pKey].hasFailed = !!loadedData.planets[pKey].hasFailed;
@@ -862,8 +883,6 @@ function loadGame() {
     
     if (gameData.upgrades.mechJeb.unlocked) initializeMechJeb();
     updatePlanetVisibility('dres');
-    
-    initLabelsSetting();
 }
 
 function executeReset() { isResetting = true; localStorage.removeItem('kspIdleSave'); location.reload(); }
@@ -882,6 +901,10 @@ if (typeof generateUnitCards === 'function') {
 const btnClick = document.getElementById('btn-click');
 if (btnClick) {
     btnClick.addEventListener('click', manualClick);
+																										
+								   
+					  
+	   
 }
 
 document.getElementById('btn-unlock').addEventListener('click', unlockSelectedPlanet);
@@ -1079,6 +1102,7 @@ setInterval(() => { if (!isPaused) saveGame(); }, 5000);
 window.addEventListener('beforeunload', saveGame);
 
 loadGame();
+initLabelsSetting();
 updateHeader();
 
 if (!gameData.selectedPlanet) gameData.selectedPlanet = 'kerbol';

@@ -14,18 +14,17 @@ const unitDOMMapping = {
     heatShieldProd: { cardId: 'heat-shield-prod-card', prefix: 'heat-shield-prod', title: '🛡️ Heat Shield Production', yieldResource: 'funds', btnText: 'Build' },
     solarObsPlatform: { cardId: 'solar-obs-platform-card', prefix: 'solar-obs-platform', title: '🔭 Solar Observation Platform', yieldResource: 'science', btnText: 'Construct' },
     // Eve
-    spaceElevator: { cardId: 'space-elevator-card', prefix: 'space-elevator', title: '🗼 Space Elevator', yieldResource: 'funds', btnText: 'Construct' },
+    spaceElevator: { cardId: 'space-elevator-card', prefix: 'space-elevator', title: '🗼 Space Elevator', yieldResource: 'funds', btnText: 'Construct', req: 'spaceElevatorTech' },
     sstoFreighter: { cardId: 'ssto-freighter-card', prefix: 'ssto-freighter', title: '✈️ SSTO Freighter', yieldResource: 'funds', btnText: 'Build' },
     mysteryGoo: { cardId: 'mystery-goo-card', prefix: 'mystery-goo', title: '🧪 Mystery Goo™ Surface Experiment', yieldResource: 'science', btnText: 'Deploy' },
     // Gilly
     parachuteProd: { cardId: 'parachute-prod-card', prefix: 'parachute-prod', title: '🪂 Parachute Production', yieldResource: 'funds', btnText: 'Build' },
     lowGravGolfCourse: { cardId: 'low-grav-golf-card', prefix: 'low-grav-golf', title: '⛳ Low-Gravity Golf Course', yieldResource: 'funds', btnText: 'Open Course' },
     // Kerbin
-    hotel: { cardId: 'hotel-card', prefix: 'hotel', title: '🏨 H.O.T.E.L.', yieldResource: 'funds', btnText: 'Launch Module', multiplier: 'tourism' },
+    hotel: { cardId: 'hotel-card', prefix: 'hotel', title: '🏨 H.O.T.E.L.', yieldResource: 'funds', btnText: 'Launch Module' },
     kerbalTraining: { cardId: 'training-card', prefix: 'training', title: '🏫 Kerbal Training Center', yieldResource: 'science', btnText: 'Build Center' },
-    researchStation: { cardId: 'station-card', prefix: 'station', title: '🛰️ Orbital Research Station', yieldResource: 'science', btnText: 'Launch Module' },
     // Mun
-    he3Extractor: { cardId: 'he3-card', prefix: 'he3', title: '🏭 Helium-3 Extractor', yieldResource: 'funds', btnText: 'Build' },
+    he3Extractor: { cardId: 'he3-card', prefix: 'he3', title: '🏭 Helium-3 Extractor', yieldResource: 'funds', btnText: 'Build', req: 'unlockHe3' },
     regolithLab: { cardId: 'regolith-lab-card', prefix: 'regolith-lab', title: '🔬 Regolith Laboratory', yieldResource: 'science', btnText: 'Build Lab' },
     // Minmus
     mintIceCream: { cardId: 'mint-ice-cream-card', prefix: 'mint-ice-cream', title: '🍦 Mint Ice Cream Extractor', yieldResource: 'funds', btnText: 'Extract' },
@@ -33,7 +32,7 @@ const unitDOMMapping = {
     // Duna
     spaceyLifter: { cardId: 'spacey-lifter-card', prefix: 'spacey-lifter', title: '🚀 SpaceY Heavy Booster', yieldResource: 'funds', btnText: 'Launch' },
     duneBuggyRally: { cardId: 'dune-buggy-card', prefix: 'dune-buggy', title: '🏎️ Dune Buggy Rally', yieldResource: 'funds', btnText: 'Host Race' },
-    rover: { cardId: 'rover-card', prefix: 'rover', title: '🚙 Autonomous Science Rover', yieldResource: 'science', btnText: 'Launch Rover', multiplier: 'rover' },
+    rover: { cardId: 'rover-card', prefix: 'rover', title: '🚙 Autonomous Science Rover', yieldResource: 'science', btnText: 'Launch Rover', req: 'unlockRover' },
     // Ike
     craterResearch: { cardId: 'crater-research-card', prefix: 'crater-research', title: '🏗️ Ike Crater Research Base', yieldResource: 'science', btnText: 'Build Base' },
     telescopeObs: { cardId: 'telescope-card', prefix: 'telescope', title: '🔭 Tidal-Lock Telescope Observatory', yieldResource: 'science', btnText: 'Build Lab' },
@@ -67,54 +66,39 @@ const unitDOMMapping = {
 };
 
 function getUnitMultiplier(unitKey) {
-    const mapping = unitDOMMapping[unitKey];
-    if (!mapping) return 1;
-
-    const multType = mapping.multiplier;
-    if (!multType) return 1;
-
-    if (multType === 'tourism' && gameData.upgrades.publicRelations.unlocked) return 2;
-    
-    if (multType !== 'rover') return 1;
-    
-    let mult = 1;
-    if (gameData.upgrades.advancedAvionics.unlocked) mult *= 1.2;
-    if (gameData.upgrades.scanSatMapping.unlocked) mult *= 2.0;
-    return mult;
+    // Da alte Multiplikatoren (Avionics, SCANsat, Public Relations) entfernt wurden, 
+    // gibt diese Funktion standardmäßig 1 zurück. Kann später für neue Synergien erweitert werden.
+    return 1;
 }
 
 const gameData = {
     funds: 0, totalFundsEarned: 0, science: 0, totalScienceEarned: 0, maxWarpUnlocked: 0, missionTime: 0, selectedPlanet: null, claimedContracts: [], completedContracts: [], cachedTotalIncome: 0, cachedTotalScience: 0,
-    techDummies: [{ id: 'dummy-rover-he3', source: 'unlockRover', target: 'unlockHe3', tier: 4, row: 3 }],
+    asteroidsCaught: 0,
+    hasLaunchedRocket: false,
+    techDummies: [
+        { id: 'dummy-1', source: 'strutsAndBoosters', target: 'krakenDrive', tier: 8, row: 1 },
+        { id: 'dummy-2', source: 'spaceElevatorTech', target: 'krakenDrive', tier: 8, row: 2 }
+    ],
     upgrades: {
-        rocketTech: { id: 'rocketTech', name: 'Solid Rocket Boosters', cost: 25, unlocked: false, desc: 'Doubles the click value on Kerbin', tier: 1, row: 3, req: [] },
-        efficientMiners: { id: 'efficientMiners', name: 'Optimized Drills', cost: 10, unlocked: false, desc: 'Increases yield of all mining vehicles by +50%', tier: 2, row: 3, req: ['rocketTech'] },
-        mechJeb: { id: 'mechJeb', name: 'MechJeb Autopilot', cost: 150, unlocked: false, desc: 'Automates the Manual Start (Click).', tier: 3, row: 1, req: ['efficientMiners'] },
-        trackingStation: { id: 'trackingStation', name: 'Tracking Station', cost: 40, unlocked: false, desc: 'Deep space tracking network. Allows detection and collection of passing asteroids.', tier: 2, row: 5, req: ['rocketTech'] },
-        longTermMissions: { id: 'longTermMissions', name: 'Long-Term Missions', cost: 1500, unlocked: false, desc: 'Increases Funds and Science income by +10% while in Time-Warp.', tier: 3, row: 5, req: ['trackingStation'] },
-        unlockRover: { id: 'unlockRover', name: 'Rover Technology', cost: 50, unlocked: false, desc: 'Unlocks the Autonomous Science Rover', tier: 3, row: 2, req: ['efficientMiners'] },
-        kerbalKonstructs: { id: 'kerbalKonstructs', name: 'Kerbal Konstructs', cost: 150, unlocked: false, desc: 'Extraterrestrial Bases. Doubles global Funds income!', tier: 3, row: 3, req: ['efficientMiners'] },
-        docking: { id: 'docking', name: 'Docking & Orbital Assembly', cost: 500, unlocked: false, desc: 'Unlocks various Orbital Stations across different planets.', tier: 3, row: 4, req: ['efficientMiners'] },
-        unlockTouristHotel: { id: 'unlockTouristHotel', name: 'Orbital Tourism', cost: 250, unlocked: false, desc: 'Unlocks the Orbital Tourism Hotel on Kerbin', tier: 4, row: 4, req: ['docking'] },
-        unlockResearchStation: { id: 'unlockResearchStation', name: 'Orbital Research Station', cost: 500, unlocked: false, desc: 'Unlocks the Orbital Research Station on Kerbin', tier: 4, row: 5, req: ['docking'] },
-        commNetRelay: { id: 'commNetRelay', name: 'CommNet Relay', cost: 1000, unlocked: false, desc: 'Increases the Science yield of all labs by +50%', tier: 5, row: 2, req: ['advancedAvionics'] },
-        unlockHe3: { id: 'unlockHe3', name: 'Helium-3 Extraction', cost: 1500, unlocked: false, desc: 'Unlocks the Helium-3 Extractor on the Mun', tier: 5, row: 3, req: ['unlockRover', 'kerbalKonstructs'] },
-        publicRelations: { id: 'publicRelations', name: 'Public Relations Office', cost: 2000, unlocked: false, desc: 'Increases the yield of the Tourism Hotel by +100%', tier: 5, row: 4, req: ['unlockTouristHotel'] },
-        dartEngine: { id: 'dartEngine', name: 'Dart Aerospike Engine', cost: 3500, unlocked: false, desc: 'Advanced atmospheric propulsion. Necessary for travel to Eve.', tier: 6, row: 2, req: ['commNetRelay'] },
-        drogueChute: { id: 'drogueChute', name: 'Drogue Chute', cost: 3000, unlocked: false, desc: 'High-altitude parachute system. Necessary for a safe landing in Dunas thin atmosphere.', tier: 6, row: 3, req: ['commNetRelay', 'unlockHe3'] },
-        radiators: { id: 'radiators', name: 'Radiators', cost: 4000, unlocked: false, desc: 'Heat dissipation systems. Necessary for travel to Moho.', tier: 6, row: 1, req: ['commNetRelay'] },
-        betterTelescopes: { id: 'betterTelescopes', name: 'Better Telescopes', cost: 10000, unlocked: false, desc: 'Advanced optical arrays. Finally proves the existence of a so-called "Dres".', tier: 7, row: 1, req: ['radiators'] },
-        aerocapture: { id: 'aerocapture', name: 'Aerocapture Maneuver', cost: 15000, unlocked: false, desc: 'Advanced orbital mechanics. Necessary for travel to Jool.', tier: 7, row: 3, req: ['drogueChute'] },
-        spaceElevatorTech: { id: 'spaceElevatorTech', name: 'Space Elevator', cost: 20000, unlocked: false, desc: 'A massive orbital tether. Unlocks the Space Elevator on Kerbin and Eve.', tier: 8, row: 1, req: ['aerocapture'] },																																																							 
-        rapierEngine: { id: 'rapierEngine', name: 'R.A.P.I.E.R. Engine', cost: 25000, unlocked: false, desc: 'Hybrid propulsion system. Necessary for travel to Laythe.', tier: 8, row: 2, req: ['aerocapture'] },
-        rtg: { id: 'rtg', name: 'Radioisotope Thermoelectric Generator', cost: 30000, unlocked: false, desc: 'Reliable deep space power. Necessary for travel to Eeloo.', tier: 8, row: 4, req: ['aerocapture'] },
-        krakenDrive: { id: 'krakenDrive', name: 'Kraken Drive', cost: 100000, unlocked: false, desc: 'Experimental spacetime manipulation. Increases the last warp level from x20 to x22.', tier: 11, row: 3, req: ['rtg'] },
-        launchAbortSystem: { id: 'launchAbortSystem', name: 'Launch Abort System', cost: 50, unlocked: false, desc: 'Safety first! Doubles the yield of a manual click.', tier: 2, row: 1, req: ['rocketTech'] },
-        improvedFlagMaterial: { id: 'improvedFlagMaterial', name: 'Improved Flag Material', cost: 800, unlocked: false, desc: 'Better flags inspire everyone. Grants a +10% boost to global Funds and Science income.', tier: 4, row: 1, req: ['mechJeb'] },
-        advancedAvionics: { id: 'advancedAvionics', name: 'Advanced Avionics', cost: 1200, unlocked: false, desc: 'Smarter driving software. All Rovers generate +20% Science.', tier: 4, row: 2, req: ['unlockRover'] },
-        munTransferStation: { id: 'munTransferStation', name: 'Mun Transfer Station', cost: 2500, unlocked: false, desc: 'Orbital logistics limit launch weight. Lowers the cost of all units on the Mun by 20%.', tier: 6, row: 5, req: ['unlockResearchStation'] },
-        scanSatMapping: { id: 'scanSatMapping', name: 'SCANsat Mapping', cost: 3500, unlocked: false, desc: 'High-res orbital mapping. Increases the Science yield of all Rovers by +100%.', tier: 5, row: 1, req: ['advancedAvionics'] },
-        inflatableHabitats: { id: 'inflatableHabitats', name: 'Inflatable Habitats', cost: 12000, unlocked: false, desc: 'More space for Kerbals to stretch. Doubles the yield of Colony Modules.', tier: 7, row: 2, req: ['drogueChute'] }
+        launchAbortSystem: { id: 'launchAbortSystem', name: 'Launch Abort System', cost: 50, unlocked: false, desc: 'Safety first! Doubles the yield of a manual click.', tier: 1, row: 3, req: [] },
+        mechJeb: { id: 'mechJeb', name: 'MechJeb Autopilot', cost: 150, unlocked: false, desc: 'Automates the Manual Start (Click).', tier: 6, row: 3, req: ['unlockHe3'] },
+        trackingStation: { id: 'trackingStation', name: 'Tracking Station', cost: 40, unlocked: false, desc: 'Deep space tracking network. Allows detection and collection of passing asteroids.', tier: 3, row: 2, req: ['commNet'] },
+        longTermMissions: { id: 'longTermMissions', name: 'Long-Term Missions', cost: 1500, unlocked: false, desc: 'Increases Funds and Science income by +10% while in Time-Warp.', tier: 7, row: 3, req: ['mechJeb'] },
+        unlockRover: { id: 'unlockRover', name: 'Rover Technology', cost: 50, unlocked: false, desc: 'Unlocks the Autonomous Science Rover on Duna', tier: 5, row: 6, req: ['drogueChute'] },
+        unlockHe3: { id: 'unlockHe3', name: 'Helium-3 Extraction', cost: 1500, unlocked: false, desc: 'Unlocks the Helium-3 Extractor on the Mun', tier: 4, row: 3, req: ['commNet'] },
+        commNet: { id: 'commNet', name: 'CommNet', cost: 1000, unlocked: false, desc: 'A global antenna and relay network. Increases global science income by +5% per successfully unlocked planet.', tier: 2, row: 3, req: ['launchAbortSystem'] },
+        strutsAndBoosters: { id: 'strutsAndBoosters', name: 'Struts and Boosters', cost: 500, unlocked: false, desc: 'If it moves and it shouldn\'t: struts. If it doesn\'t move and it should: boosters. Reduces the total cost of all rocket components in the pre-mission panel by 50%.', tier: 7, row: 1, req: ['veryHeavyRocketry'] },
+        veryHeavyRocketry: { id: 'veryHeavyRocketry', name: 'Very Heavy Rocketry', cost: 2500, unlocked: false, desc: 'Because "Heavy Rocketry" was just the starting line. Doubles the maximum upgrade level of all rocket components from 5 to 10.', tier: 6, row: 1, req: ['valentinasCoffee'] },
+        valentinasCoffee: { id: 'valentinasCoffee', name: 'Valentina\'s Coffee Machine', cost: 800, unlocked: false, desc: 'Keeps the mission control staff wide awake and focused. Increases the success probability of all transfer missions by 10%.', tier: 5, row: 1, req: ['trackingStation'] },
+        dartEngine: { id: 'dartEngine', name: 'Dart Aerospike Engine', cost: 3500, unlocked: false, desc: 'Advanced atmospheric propulsion. Necessary for travel to Eve.', tier: 9, row: 4, req: ['rtg'] },
+        drogueChute: { id: 'drogueChute', name: 'Drogue Chute', cost: 3000, unlocked: false, desc: 'High-altitude parachute system. Necessary for a safe landing in Dunas thin atmosphere.', tier: 4, row: 5, req: ['commNet'] },
+        radiators: { id: 'radiators', name: 'Radiators', cost: 4000, unlocked: false, desc: 'Heat dissipation systems. Necessary for travel to Moho.', tier: 5, row: 4, req: ['drogueChute'] },
+        betterTelescopes: { id: 'betterTelescopes', name: 'Better Telescopes', cost: 10000, unlocked: false, desc: 'Advanced optical arrays. Finally proves the existence of a so-called "Dres".', tier: 7, row: 4, req: ['aerocapture', 'radiators'] },
+        aerocapture: { id: 'aerocapture', name: 'Aerocapture Maneuver', cost: 15000, unlocked: false, desc: 'Advanced orbital mechanics. Necessary for travel to Jool.', tier: 6, row: 5, req: ['drogueChute'] },
+        spaceElevatorTech: { id: 'spaceElevatorTech', name: 'Space Elevator', cost: 20000, unlocked: false, desc: 'A massive orbital tether. Unlocks the Space Elevator on Kerbin and Eve.', tier: 6, row: 2, req: ['unlockHe3'] },
+        rapierEngine: { id: 'rapierEngine', name: 'R.A.P.I.E.R. Engine', cost: 25000, unlocked: false, desc: 'Hybrid propulsion system. Necessary for travel to Laythe.', tier: 7, row: 6, req: ['aerocapture'] },
+        rtg: { id: 'rtg', name: 'Radioisotope Thermoelectric Generator', cost: 30000, unlocked: false, desc: 'Reliable deep space power. Necessary for travel to Eeloo.', tier: 8, row: 5, req: ['betterTelescopes', 'rapierEngine'] },
+        krakenDrive: { id: 'krakenDrive', name: 'Kraken Drive', cost: 100000, unlocked: false, desc: 'Experimental spacetime manipulation. Increases the last warp level from x20 to x22.', tier: 11, row: 3, req: ['dartEngine', 'longTermMissions', 'spaceElevatorTech', 'strutsAndBoosters'] }
     },
     planets: {
         kerbol: { id: 'kerbol', name: 'Kerbol', unlocked: true, desc: 'The massive central star of the system. The inexhaustible source of all light and heat.', unlockCost: 0, units: {} },
@@ -151,8 +135,8 @@ const gameData = {
                 rocket: { baseCost: 10, costMult: 1.15, owned: 1, basePower: 1, max: 50 },
                 hotel: { baseCost: 2500, costMult: 1.2, owned: 0, basePower: 40, max: 50 },
                 spaceElevator: { baseCost: 25000, costMult: 1.25, owned: 0, basePower: 300, max: 50 },
-                kerbalTraining: { baseCost: 1500, costMult: 1.3, owned: 0, basePower: 15, max: 50 },
-                researchStation: { baseCost: 4000, costMult: 1.25, owned: 0, basePower: 15, max: 50 }
+                kerbalTraining: { baseCost: 1500, costMult: 1.3, owned: 0, basePower: 15, max: 50 }
+																									 
             }
         },
         mun: {
@@ -293,97 +277,52 @@ const contracts = [
             return Math.min(gameData.planets.kerbin.units.hotel.owned, 5);
         }, target: 5 
     },
-    { id: 'mun_unlock', req: 'sci_basics', title: "Mun Mission", desc: "Unlock the Mun", condition: () => gameData.planets.mun.unlocked, rewardText: `+${formatNumber(50)} ${ICON_SCI}`, reward: () => gameData.science += 50, current: () => gameData.planets.mun.unlocked ? 1 : 0, target: 1 },
-    { id: 'kk_base', req: 'sci_basics', title: "Project: Extraterrestrial Base", desc: "Research 'Kerbal Konstructs' in the R&D Center", condition: () => gameData.upgrades.kerbalKonstructs.unlocked, rewardText: `+${formatNumber(10000)} ${ICON_FUNDS}`, reward: () => gameData.funds += 10000, current: () => gameData.upgrades.kerbalKonstructs.unlocked ? 1 : 0, target: 1 },
-    { id: 'commnet', req: 'sci_basics', title: "CommNet Optimization", desc: "Research 'CommNet Relay'", condition: () => gameData.upgrades.commNetRelay.unlocked, rewardText: `+${formatNumber(1000)} ${ICON_FUNDS}`, reward: () => gameData.funds += 1000, current: () => gameData.upgrades.commNetRelay.unlocked ? 1 : 0, target: 1 },
-    { 
-        id: 'commnet_kerbin', 
-        req: 'commnet', 
-        title: "Kerbin System CommNet", 
-        desc: "Build at least 1 Science Unit on every celestial body in the Kerbin system.", 
+    {
+        id: 'max_unit_upgrade', req: 'tourism', title: "Maximum Capacity", desc: "Upgrade any unit to its maximum level",
         condition: () => {
-            const bodies = ['kerbin', 'mun', 'minmus'];
-            let completed = 0;
-            for (const pKey of bodies) {
+            for (const pKey in gameData.planets) {
                 const planet = gameData.planets[pKey];
                 if (!planet || !planet.units) continue;
 
-                let hasScience = false;
                 for (const uKey in planet.units) {
-                    if (!unitDOMMapping[uKey]) continue;
-                    if (unitDOMMapping[uKey].yieldResource !== 'science') continue;
-                    if (planet.units[uKey].owned <= 0) continue;
-                    hasScience = true;
-                    break;
+                    const unit = planet.units[uKey];
+                    if (!unit) continue;
+                    if (unit.owned >= unit.max) return true;
                 }
-                if (!hasScience) continue;
-                completed++;
             }
-            return completed >= bodies.length;
-        }, 
-        rewardText: `+${formatNumber(2000)} ${ICON_SCI}`, 
-        reward: () => gameData.science += 2000, 
+            return false;
+        },
+        rewardText: `+${formatNumber(5000)} ${ICON_FUNDS}`, reward: () => gameData.funds += 5000,
         current: () => {
-            const bodies = ['kerbin', 'mun', 'minmus'];
-            let completed = 0;
-            for (const pKey of bodies) {
+            for (const pKey in gameData.planets) {
                 const planet = gameData.planets[pKey];
                 if (!planet || !planet.units) continue;
-                let hasScience = false;
+
                 for (const uKey in planet.units) {
-                    if (!unitDOMMapping[uKey] || unitDOMMapping[uKey].yieldResource !== 'science' || planet.units[uKey].owned <= 0) continue;
-                    hasScience = true;
-                    break;
+                    const unit = planet.units[uKey];
+                    if (!unit) continue;
+                    if (unit.owned >= unit.max) return 1;
                 }
-                if (hasScience) completed++;
             }
-            return completed;
-        }, 
-        target: 3 
+            return 0;
+        }, target: 1
     },
     { 
-        id: 'commnet_jool', 
-        req: 'commnet_kerbin', 
-        title: "Jool System CommNet", 
-        desc: "Build at least 1 Science Unit on every celestial body in the Jool system.", 
-        condition: () => {
-            const bodies = ['jool', 'laythe', 'vall', 'tylo', 'bop', 'pol'];
-            let completed = 0;
-            for (const pKey of bodies) {
-                const planet = gameData.planets[pKey];
-                if (!planet || !planet.units) continue;
-                let hasScience = false;
-                for (const uKey in planet.units) {
-                    if (!unitDOMMapping[uKey] || unitDOMMapping[uKey].yieldResource !== 'science' || planet.units[uKey].owned <= 0) continue;
-                    hasScience = true;
-                    break;
-                }
-                if (!hasScience) continue;
-                completed++;
-            }
-            return completed >= bodies.length;
-        }, 
-        rewardText: `+${formatNumber(10000)} ${ICON_SCI}`, 
-        reward: () => gameData.science += 10000, 
-        current: () => {
-            const bodies = ['jool', 'laythe', 'vall', 'tylo', 'bop', 'pol'];
-            let completed = 0;
-            for (const pKey of bodies) {
-                const planet = gameData.planets[pKey];
-                if (!planet || !planet.units) continue;
-                let hasScience = false;
-                for (const uKey in planet.units) {
-                    if (!unitDOMMapping[uKey] || unitDOMMapping[uKey].yieldResource !== 'science' || planet.units[uKey].owned <= 0) continue;
-                    hasScience = true;
-                    break;
-                }
-                if (hasScience) completed++;
-            }
-            return completed;
-        }, 
-        target: 6 
+        id: 'first_rocket_launch', req: 'sci_basics', title: "First Rocket Launch", desc: "Launch your first transfer rocket to another celestial body", 
+        condition: () => !!gameData.hasLaunchedRocket, 
+        rewardText: `+${formatNumber(1000)} ${ICON_FUNDS}`, reward: () => gameData.funds += 1000, 
+        current: () => gameData.hasLaunchedRocket ? 1 : 0, target: 1 
     },
-    { id: 'pr_upgrade', req: 'tourism', title: "Public Relations", desc: "Research 'Public Relations Office' in the R&D Center", condition: () => gameData.upgrades.publicRelations.unlocked, rewardText: `+${formatNumber(500)} ${ICON_SCI}`, reward: () => gameData.science += 500, current: () => gameData.upgrades.publicRelations.unlocked ? 1 : 0, target: 1 },
+    { id: 'mun_unlock', req: 'first_rocket_launch', title: "Mun Mission", desc: "Unlock the Mun", condition: () => gameData.planets.mun.unlocked, rewardText: `+${formatNumber(50)} ${ICON_SCI}`, reward: () => gameData.science += 50, current: () => gameData.planets.mun.unlocked ? 1 : 0, target: 1 },
+    { id: 'duna_unlock', req: 'mun_unlock', title: "Red Planet Expedition", desc: "Unlock Duna", condition: () => gameData.planets.duna.unlocked, rewardText: `+${formatNumber(500)} ${ICON_SCI}`, reward: () => gameData.science += 500, current: () => gameData.planets.duna.unlocked ? 1 : 0, target: 1 },
+    { id: 'commnet', req: 'sci_basics', title: "CommNet Optimization", desc: "Research 'CommNet' in the R&D Center", condition: () => gameData.upgrades.commNet.unlocked, rewardText: `+${formatNumber(1000)} ${ICON_FUNDS}`, reward: () => gameData.funds += 1000, current: () => gameData.upgrades.commNet.unlocked ? 1 : 0, target: 1 },
+    { id: 'unlock_tracking_station', req: 'commnet', title: "Tracking Station", desc: "Research 'Tracking Station' in the R&D Center", condition: () => gameData.upgrades.trackingStation.unlocked, rewardText: `+${formatNumber(1500)} ${ICON_FUNDS}`, reward: () => gameData.funds += 1500, current: () => gameData.upgrades.trackingStation.unlocked ? 1 : 0, target: 1 },
+    { 
+        id: 'catch_asteroids', req: 'unlock_tracking_station', title: "Asteroid Capture", desc: "Catch 10 passing asteroids on the map", 
+        condition: () => (gameData.asteroidsCaught || 0) >= 10, 
+        rewardText: `+${formatNumber(200)} ${ICON_SCI}`, reward: () => gameData.science += 200, 
+        current: () => Math.min(gameData.asteroidsCaught || 0, 10), target: 10 
+    },
     { 
         id: 'duna_rovers', req: 'mun_unlock', title: "Duna Rover Fleet", desc: "Send 3 Science Rovers to Duna", 
         condition: () => {
@@ -433,45 +372,5 @@ const contracts = [
             return unlocked;
         },
         target: 16
-    },
-    { 
-        id: 'deep_space_network', 
-        req: 'commnet_jool', 
-        title: "Deep Space Network", 
-        desc: "Build at least 1 Science Unit on every celestial body.", 
-        condition: () => {
-            let count = 0;
-            for (const pKey in gameData.planets) {
-                const planet = gameData.planets[pKey];
-                if (!planet || !planet.units) continue;
-                let hasScience = false;
-                for (const uKey in planet.units) {
-                    if (!unitDOMMapping[uKey] || unitDOMMapping[uKey].yieldResource !== 'science' || planet.units[uKey].owned <= 0) continue;
-                    hasScience = true;
-                    break;
-                }
-                if (!hasScience) continue;
-                count++;
-            }
-            return count >= 16;
-        }, 
-        rewardText: `+${formatNumber(5000)} ${ICON_SCI}`, 
-        reward: () => gameData.science += 5000, 
-        current: () => {
-            let count = 0;
-            for (const pKey in gameData.planets) {
-                const planet = gameData.planets[pKey];
-                if (!planet || !planet.units) continue;
-                let hasScience = false;
-                for (const uKey in planet.units) {
-                    if (!unitDOMMapping[uKey] || unitDOMMapping[uKey].yieldResource !== 'science' || planet.units[uKey].owned <= 0) continue;
-                    hasScience = true;
-                    break;
-                }
-                if (hasScience) count++;
-            }
-            return count > 16 ? 16 : count;
-        }, 
-        target: 16 
     }
 ];

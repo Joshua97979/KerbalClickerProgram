@@ -108,7 +108,9 @@ function spawnAsteroid() {
     
     sprite.addEventListener('click', (e) => {
         e.stopPropagation();
-
+		
+		gameData.asteroidsCaught = (gameData.asteroidsCaught || 0) + 1;
+		
         const chance = Math.random();
         const giveFunds = chance < 0.7;
         const giveScience = chance > 0.3;

@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KSP Idle - Tech Tree Editor</title>
+    <script src="data.js"></script>
+    <style>
+        :root {
+            --bg-color: #1a1a24;
+            --grid-bg: #222230;
+            --text-color: #e0e0e0;
+            --accent: #bada55;
+            --accent-orange: #f39c12;
+            --dummy-border: #3498db;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        h1 { margin-top: 0; }
+
+        .toolbar {
+            display: flex;
+            gap: 15px;
+            background: #2a2a3a;
+            padding: 15px;
+            border-radius: 8px;
+            align-items: center;
+        }
+
+        button {
+            background-color: var(--accent-orange);
+            color: #111;
+            border: none;
+            padding: 10px 20px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: transform 0.1s;
+        }
+
+        button:active { transform: scale(0.95); }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: 50px repeat(12, 160px);
+            grid-template-rows: 30px repeat(6, 120px);
+            gap: 5px;
+            overflow-x: auto;
+            padding-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header-cell {
+            text-align: center;
+            font-weight: bold;
+            color: var(--accent);
+            align-self: center;
+        }
+
+        .row-label {
+            align-self: center;
+            text-align: right;
+            padding-right: 10px;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .drop-zone {
+            background-color: var(--grid-bg);
+            border: 1px dashed #444;
+            border-radius: 6px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            flex-wrap: wrap;
+            z-index: 2;
+        }
+
+        .drop-zone.drag-over {
+            background-color: #3a3a4a;
+            border-color: var(--accent);
+        }
+
+        .card {
+            background: linear-gradient(180deg, #3a3a4a 0%, #2a2a3a 100%);
+            border: 1px solid #555;
+            border-radius: 4px;
+            padding: 8px;
+            width: 140px;
+            height: 90px;
+            cursor: grab;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            font-size: 12px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+            user-select: none;
+        }
+
+        .card.dummy-card {
+            background: linear-gradient(180deg, #1c2b36 0%, #111a22 100%);
+            border: 1px dashed var(--dummy-border);
+        }
+
+        .card.dummy-card .card-title {
+            color: var(--dummy-border);
+        }
+
+        .card:active { cursor: grabbing; }
+        .card-title { font-weight: bold; margin-bottom: 5px; font-size: 11px; color: var(--accent-orange); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card-reqs { font-size: 10px; color: #888; flex-grow: 1; overflow: hidden; }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: #2a2a3a;
+            padding: 20px;
+            border-radius: 8px;
+            width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .modal input[type="text"], .modal input[type="number"], .modal select {
+            background: #1a1a24;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 8px;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .req-list-container {
+            background: #1a1a24;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 10px;
+            max-height: 130px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .req-list-container label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .export-area {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 350px;
+            background: #111;
+            color: var(--accent);
+            font-family: monospace;
+            padding: 10px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            white-space: pre;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🚀 KSP Idle - Tech Tree Editor</h1>
+    
+    <div class="toolbar">
+        <button onclick="exportCode()">💾 Code Exportieren</button>
+        <span style="font-size: 14px; color: #888;">Ziehe die Karten, um Tier/Row zu ändern. Klicke auf eine Karte, um Eigenschaften zu bearbeiten.</span>
+    </div>
+
+    <div class="export-area" id="export-area">
+        <label for="export-output">Kopiere diesen Code und ersetze damit <b>techDummies</b> und <b>upgrades</b> in der <b>data.js</b>:</label>
+        <textarea id="export-output" readonly></textarea>
+        <button style="width: 200px; background-color: #555;" onclick="closeExport()">Schließen</button>
+    </div>
+
+    <div class="grid-container" id="grid">
+    </div>
+
+    <div class="modal" id="edit-modal">
+        <div class="modal-content">
+            <h3 id="modal-title" style="margin: 0; color: var(--accent-orange);">Upgrade Bearbeiten</h3>
+            
+            <input type="hidden" id="edit-id">
+            <input type="hidden" id="edit-is-dummy">
+            
+            <div id="upgrade-fields" style="display: flex; flex-direction: column; gap: 10px;">
+                <label>Name:</label>
+                <input type="text" id="edit-name">
+                
+                <label>Kosten (Science):</label>
+                <input type="number" id="edit-cost">
+                
+                <label>Requirements (auswählen):</label>
+                <div id="edit-req-list" class="req-list-container">
+                </div>
+            </div>
+
+            <div id="dummy-fields" style="display: flex; flex-direction: column; gap: 10px;">
+                <label>Source Upgrade ID:</label>
+                <select id="edit-dummy-source"></select>
+                
+                <label>Target Upgrade ID:</label>
+                <select id="edit-dummy-target"></select>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button onclick="saveEdit()">Speichern</button>
+                <button onclick="closeModal()" style="background-color: #555;">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+let techDummiesData = (typeof gameData !== 'undefined' && gameData.techDummies) 
+    ? JSON.parse(JSON.stringify(gameData.techDummies)) 
+    : [];
+
+let upgradesData = (typeof gameData !== 'undefined' && gameData.upgrades) 
+    ? JSON.parse(JSON.stringify(gameData.upgrades)) 
+    : {};
+
+const MAX_TIERS = 12;
+const MAX_ROWS = 6;
+
+function initGrid() {
+    const grid = document.getElementById('grid');
+    if (!grid) return;
+
+    grid.innerHTML = '';
+    
+    grid.appendChild(createDiv('header-cell', ''));
+    for (let t = 1; t <= MAX_TIERS; t++) {
+        grid.appendChild(createDiv('header-cell', `Tier ${t}`));
+    }
+
+    for (let r = 1; r <= MAX_ROWS; r++) {
+        grid.appendChild(createDiv('row-label', `Row ${r}`));
+        for (let t = 1; t <= MAX_TIERS; t++) {
+            const cell = createDiv('drop-zone', '');
+            cell.dataset.tier = t;
+            cell.dataset.row = r;
+            
+            cell.addEventListener('dragover', handleDragOver);
+            cell.addEventListener('dragleave', handleDragLeave);
+            cell.addEventListener('drop', handleDrop);
+            
+            grid.appendChild(cell);
+        }
+    }
+
+    placeCards();
+    requestAnimationFrame(drawLines);
+}
+
+function placeCards() {
+    for (const key in upgradesData) {
+        const upgrade = upgradesData[key];
+        const cell = document.querySelector(`.drop-zone[data-tier="${upgrade.tier}"][data-row="${upgrade.row}"]`);
+        
+        if (!cell) continue;
+
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.draggable = true;
+        card.id = `card-upgrade-${upgrade.id}`;
+        card.dataset.id = upgrade.id;
+        card.dataset.isDummy = 'false';
+        
+        card.addEventListener('dragstart', handleDragStart);
+        card.addEventListener('click', openEditModal);
+        
+        updateCardContent(card, upgrade);
+        cell.appendChild(card);
+    }
+
+    for (let i = 0; i < techDummiesData.length; i++) {
+        const dummy = techDummiesData[i];
+        const cell = document.querySelector(`.drop-zone[data-tier="${dummy.tier}"][data-row="${dummy.row}"]`);
+
+        if (!cell) continue;
+
+        const card = document.createElement('div');
+        card.className = 'card dummy-card';
+        card.draggable = true;
+        card.id = `card-dummy-${dummy.id}`;
+        card.dataset.id = dummy.id;
+        card.dataset.isDummy = 'true';
+
+        card.addEventListener('dragstart', handleDragStart);
+        card.addEventListener('click', openEditModal);
+
+        updateDummyCardContent(card, dummy);
+        cell.appendChild(card);
+    }
+}
+
+function updateCardContent(card, upgrade) {
+    if (!card || !upgrade) return;
+    const reqText = upgrade.req.length > 0 ? `Req: ${upgrade.req.join(', ')}` : 'Req: -';
+    card.innerHTML = `
+        <div class="card-title">${upgrade.name}</div>
+        <div style="font-size: 11px; margin-bottom: 5px;">Cost: ${upgrade.cost}</div>
+        <div class="card-reqs">${reqText}</div>
+    `;
+}
+
+function updateDummyCardContent(card, dummy) {
+    if (!card || !dummy) return;
+    card.innerHTML = `
+        <div class="card-title">🧩 Dummy: ${dummy.id}</div>
+        <div style="font-size: 10px; color: #aaa;">Src: ${dummy.source}</div>
+        <div style="font-size: 10px; color: #aaa;">Tgt: ${dummy.target}</div>
+    `;
+}
+
+function createDiv(className, innerText) {
+    const div = document.createElement('div');
+    div.className = className;
+    div.innerText = innerText;
+    return div;
+}
+
+function getCardElement(id) {
+    const upgCard = document.getElementById(`card-upgrade-${id}`);
+    if (upgCard) return upgCard;
+    return document.getElementById(`card-dummy-${id}`);
+}
+
+function drawLines() {
+    const grid = document.getElementById('grid');
+    if (!grid) return;
+
+    let svg = document.getElementById('editor-lines');
+    if (!svg) {
+        svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.id = 'editor-lines';
+        svg.style.position = 'absolute';
+        svg.style.top = '0';
+        svg.style.left = '0';
+        svg.style.pointerEvents = 'none';
+        svg.style.zIndex = '0';
+        grid.insertBefore(svg, grid.firstChild);
+    }
+
+    svg.innerHTML = '';
+
+    const scrollW = grid.scrollWidth;
+    const scrollH = grid.scrollHeight;
+    svg.style.width = scrollW + 'px';
+    svg.style.height = scrollH + 'px';
+
+    const gridRect = grid.getBoundingClientRect();
+
+    for (const key in upgradesData) {
+        const upg = upgradesData[key];
+        if (!upg.req || upg.req.length === 0) continue;
+
+        const targetCard = getCardElement(key);
+        if (!targetCard) continue;
+
+        const tRect = targetCard.getBoundingClientRect();
+        
+        for (const reqKey of upg.req) {
+            const sourceCard = getCardElement(reqKey);
+            
+            if (!sourceCard) continue; 
+
+            const sRect = sourceCard.getBoundingClientRect();
+
+            const startX = sRect.right - gridRect.left + grid.scrollLeft;
+            const startY = sRect.top - gridRect.top + grid.scrollTop + (sRect.height / 2);
+            
+            const endX = tRect.left - gridRect.left + grid.scrollLeft;
+            const endY = tRect.top - gridRect.top + grid.scrollTop + (tRect.height / 2);
+
+            let d = '';
+            
+            const dummyData = techDummiesData.find(dum => dum.target === key && dum.source === reqKey);
+            const dummyCard = dummyData ? document.getElementById(`card-dummy-${dummyData.id}`) : null;
+
+            if (dummyCard) {
+                const dRect = dummyCard.getBoundingClientRect();
+                const dummyInX = dRect.left - gridRect.left + grid.scrollLeft;
+                const dummyOutX = dRect.right - gridRect.left + grid.scrollLeft;
+                const dummyY = dRect.top - gridRect.top + grid.scrollTop + (dRect.height / 2);
+                
+                const midX1 = startX + (dummyInX - startX) / 2;
+                const midX2 = dummyOutX + (endX - dummyOutX) / 2;
+                
+                d = `M ${startX} ${startY} C ${midX1} ${startY}, ${midX1} ${dummyY}, ${dummyInX} ${dummyY} L ${dummyOutX} ${dummyY} C ${midX2} ${dummyY}, ${midX2} ${endY}, ${endX} ${endY}`;
+            } else {
+                const midX = startX + (endX - startX) / 2;
+                d = `M ${startX} ${startY} C ${midX} ${startY}, ${midX} ${endY}, ${endX} ${endY}`;
+            }
+
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            line.setAttribute('d', d);
+            line.setAttribute('stroke-width', '3');
+            line.setAttribute('stroke', 'rgba(186, 218, 85, 0.4)');
+            line.setAttribute('fill', 'none');
+            
+            svg.appendChild(line);
+        }
+    }
+}
+
+function handleDragStart(e) {
+    const isDummy = e.currentTarget.dataset.isDummy === 'true';
+    const id = e.currentTarget.dataset.id;
+    const payload = isDummy ? `dummy:${id}` : `upgrade:${id}`;
+    e.dataTransfer.setData('text/plain', payload);
+}
+
+function handleDragOver(e) {
+    e.preventDefault();
+    const target = e.target.closest('.drop-zone');
+    if (!target) return;
+    target.classList.add('drag-over');
+}
+
+function handleDragLeave(e) {
+    const target = e.target.closest('.drop-zone');
+    if (!target) return;
+    target.classList.remove('drag-over');
+}
+
+function handleDrop(e) {
+    e.preventDefault();
+    const targetCell = e.target.closest('.drop-zone');
+    if (!targetCell) return;
+    
+    targetCell.classList.remove('drag-over');
+
+    const payload = e.dataTransfer.getData('text/plain');
+    if (!payload) return;
+
+    const parts = payload.split(':');
+    const type = parts[0];
+    const id = parts[1];
+
+    const card = document.getElementById(`card-${type}-${id}`);
+    if (!card) return;
+
+    const newTier = parseInt(targetCell.dataset.tier);
+    const newRow = parseInt(targetCell.dataset.row);
+
+    if (type === 'dummy') {
+        const dummy = techDummiesData.find(d => d.id === id);
+        if (dummy) {
+            dummy.tier = newTier;
+            dummy.row = newRow;
+        }
+        targetCell.appendChild(card);
+    } else {
+        if (upgradesData[id]) {
+            upgradesData[id].tier = newTier;
+            upgradesData[id].row = newRow;
+        }
+        targetCell.appendChild(card);
+    }
+    
+    requestAnimationFrame(drawLines);
+}
+
+function openEditModal(e) {
+    const id = e.currentTarget.dataset.id;
+    if (!id) return;
+
+    const isDummy = e.currentTarget.dataset.isDummy === 'true';
+
+    document.getElementById('edit-id').value = id;
+    document.getElementById('edit-is-dummy').value = isDummy ? 'true' : 'false';
+
+    const upgradeFields = document.getElementById('upgrade-fields');
+    const dummyFields = document.getElementById('dummy-fields');
+
+    const allNodes = [];
+    const sortedUpgKeys = Object.keys(upgradesData).sort();
+    sortedUpgKeys.forEach(k => allNodes.push({ id: k, name: upgradesData[k].name, isDummy: false }));
+    
+    const sortedDummyKeys = [...techDummiesData].sort((a, b) => a.id.localeCompare(b.id));
+    sortedDummyKeys.forEach(d => allNodes.push({ id: d.id, name: `Dummy: ${d.id}`, isDummy: true }));
+
+    if (isDummy) {
+        const dummy = techDummiesData.find(d => d.id === id);
+        if (!dummy) return;
+
+        document.getElementById('modal-title').innerText = 'Dummy Upgrade Bearbeiten';
+        upgradeFields.style.display = 'none';
+        dummyFields.style.display = 'flex';
+
+        const sourceSelect = document.getElementById('edit-dummy-source');
+        const targetSelect = document.getElementById('edit-dummy-target');
+        
+        sourceSelect.innerHTML = '<option value="">-- Keine / Bitte wählen --</option>';
+        targetSelect.innerHTML = '<option value="">-- Keine / Bitte wählen --</option>';
+
+        allNodes.forEach(node => {
+            if (node.id === id) return;
+            
+            const optSrc = document.createElement('option');
+            optSrc.value = node.id;
+            optSrc.innerText = `${node.name} (${node.id})`;
+            if (dummy.source === node.id) optSrc.selected = true;
+            sourceSelect.appendChild(optSrc);
+
+            const optTgt = document.createElement('option');
+            optTgt.value = node.id;
+            optTgt.innerText = `${node.name} (${node.id})`;
+            if (dummy.target === node.id) optTgt.selected = true;
+            targetSelect.appendChild(optTgt);
+        });
+
+        document.getElementById('edit-modal').style.display = 'flex';
+        return;
+    }
+
+    const upgrade = upgradesData[id];
+    if (!upgrade) return;
+
+    document.getElementById('modal-title').innerText = 'Upgrade Bearbeiten';
+    dummyFields.style.display = 'none';
+    upgradeFields.style.display = 'flex';
+
+    document.getElementById('edit-name').value = upgrade.name;
+    document.getElementById('edit-cost').value = upgrade.cost;
+    
+    const reqListContainer = document.getElementById('edit-req-list');
+    reqListContainer.innerHTML = ''; 
+    
+    allNodes.forEach(node => {
+        if (node.id === id) return;
+        
+        const isChecked = upgrade.req.includes(node.id) ? 'checked' : '';
+        
+        const label = document.createElement('label');
+        label.innerHTML = `
+            <input type="checkbox" value="${node.id}" ${isChecked}> 
+            <span><b>${node.name}</b> <span style="color:#888;">(${node.id})</span></span>
+        `;
+        reqListContainer.appendChild(label);
+    });
+
+    document.getElementById('edit-modal').style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('edit-modal').style.display = 'none';
+}
+
+function saveEdit() {
+    const id = document.getElementById('edit-id').value;
+    if (!id) return;
+
+    const isDummy = document.getElementById('edit-is-dummy').value === 'true';
+
+    if (isDummy) {
+        const dummy = techDummiesData.find(d => d.id === id);
+        if (!dummy) return;
+
+        dummy.source = document.getElementById('edit-dummy-source').value.trim();
+        dummy.target = document.getElementById('edit-dummy-target').value.trim();
+
+        const card = document.getElementById(`card-dummy-${id}`);
+        updateDummyCardContent(card, dummy);
+        closeModal();
+        requestAnimationFrame(drawLines);
+        return;
+    }
+
+    if (!upgradesData[id]) return;
+
+    const checkboxes = document.querySelectorAll('#edit-req-list input[type="checkbox"]:checked');
+    const reqArr = Array.from(checkboxes).map(cb => cb.value);
+
+    upgradesData[id].name = document.getElementById('edit-name').value;
+    upgradesData[id].cost = parseInt(document.getElementById('edit-cost').value) || 0;
+    upgradesData[id].req = reqArr;
+
+    const card = document.getElementById(`card-upgrade-${id}`);
+    updateCardContent(card, upgradesData[id]);
+    closeModal();
+    
+    requestAnimationFrame(drawLines);
+}
+
+function exportCode() {
+    const area = document.getElementById('export-area');
+    const output = document.getElementById('export-output');
+    if (!area || !output) return;
+
+    let jsString = "    techDummies: [\n";
+    for (let i = 0; i < techDummiesData.length; i++) {
+        const d = techDummiesData[i];
+        jsString += `        { id: '${d.id}', source: '${d.source}', target: '${d.target}', tier: ${d.tier}, row: ${d.row} }`;
+        if (i < techDummiesData.length - 1) jsString += ",";
+        jsString += "\n";
+    }
+    jsString += "    ],\n";
+
+    jsString += "    upgrades: {\n";
+    const keys = Object.keys(upgradesData);
+    for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        const u = upgradesData[key];
+        
+        const reqStr = u.req.length > 0 ? `'${u.req.join("', '")}'` : '';
+        const nameEscaped = u.name.replace(/'/g, "\\'");
+        const descEscaped = u.desc.replace(/'/g, "\\'");
+        
+        jsString += `        ${key}: { id: '${u.id}', name: '${nameEscaped}', cost: ${u.cost}, unlocked: ${u.unlocked}, desc: '${descEscaped}', tier: ${u.tier}, row: ${u.row}, req: [${reqStr}] }`;
+        if (i < keys.length - 1) jsString += ",";
+        jsString += "\n";
+    }
+    jsString += "    },";
+
+    output.value = jsString;
+    area.style.display = 'flex';
+}
+
+function closeExport() {
+    const area = document.getElementById('export-area');
+    if (!area) return;
+    area.style.display = 'none';
+}
+
+initGrid();
+
+</script>
+</body>
+</html>

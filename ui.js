@@ -454,8 +454,6 @@ function updatePanel() {
         if (card) card.classList.add('hidden');
     });
 
-    const globalMult = gameData.upgrades.kerbalKonstructs.unlocked ? 2 : 1;
-
     for (const [unitKey, mapping] of Object.entries(unitDOMMapping)) {
         if (!planet.units[unitKey]) continue;
         if (mapping.req && !gameData.upgrades[mapping.req].unlocked) continue;
@@ -506,10 +504,6 @@ function updatePanel() {
         }
 
         let powerMult = getUnitMultiplier(unitKey);
-        
-        if (mapping.yieldResource === 'funds') {
-            powerMult *= globalMult;
-        }
         
         const singleEl = document.getElementById(`${prefix}-single`);
         if (singleEl) singleEl.innerText = formatNumber(unit.basePower * powerMult);
@@ -689,13 +683,11 @@ function initializeMechJeb() {
 }
 
 function updateOrbitHighlight() {
-    // 1. Reset aller bisherigen Hervorhebungen (SVG)
     document.querySelectorAll('ellipse[class*="svg-orbit-"]').forEach(orbit => orbit.classList.remove('svg-orbit-highlight'));
 
     const pId = gameData?.selectedPlanet;
     if (!pId || pId === 'kerbol') return;
 
-    // 2. SVG-Orbit markieren (falls vorhanden, z. B. Hauptplaneten)
     const activeSvgOrbit = document.querySelector(`.svg-orbit-${pId}`);
     if (activeSvgOrbit) activeSvgOrbit.classList.add('svg-orbit-highlight');
 }
@@ -798,7 +790,6 @@ function updateWarpUI(warpIndex, oldMultiplier, newMultiplier) {
     }
 }
 
-// Steuert die Sichtbarkeit der Labels
 function togglePlanetLabels(show) {
     if (!gameData.settings) gameData.settings = {};
     gameData.settings.showLabels = show;
@@ -814,9 +805,8 @@ function togglePlanetLabels(show) {
     map.classList.add('labels-hidden');
 }
 
-// Initialisiert die UI-Einstellung basierend auf dem geladenen Spielstand
 function initLabelsSetting() {
-    let showLabels = true; // Standardmäßig auf an
+    let showLabels = true;
     
     if (gameData.settings && gameData.settings.showLabels !== undefined) {
         showLabels = gameData.settings.showLabels;
@@ -843,13 +833,15 @@ function updateRocketUpgradesUI() {
     if (!planet.rocketUpgrades) return;
 
     const comps = ['a', 'b', 'c', 'd', 'e', 'f'];
+    const maxLevel = (gameData.upgrades.veryHeavyRocketry && gameData.upgrades.veryHeavyRocketry.unlocked) ? 10 : 5;
+
     comps.forEach(comp => {
         const currentLevel = planet.rocketUpgrades[comp] || 0;
         
         const labelEl = document.getElementById(`rocket-upgrade-${comp}`);
         if (labelEl) {
             const compUpper = comp.toUpperCase();
-            labelEl.innerHTML = `[${compUpper}]<br>${currentLevel}/5`;
+            labelEl.innerHTML = `[${compUpper}]<br>${currentLevel}/${maxLevel}`;
         }
 
         const btn = document.getElementById(`btn-upgrade-${comp}`);
@@ -857,7 +849,7 @@ function updateRocketUpgradesUI() {
 
         const costEl = document.getElementById(`upgrade-${comp}-cost`);
         
-        if (currentLevel >= 5) {
+        if (currentLevel >= maxLevel) {
             btn.classList.add('disabled-buy');
             btn.disabled = true;
             if (costEl) costEl.innerText = "MAX";

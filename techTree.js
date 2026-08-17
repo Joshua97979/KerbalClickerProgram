@@ -147,7 +147,7 @@ function renderUpgrades() {
             if (card.dataset.state === "locked") continue;
             card.dataset.state = "locked";
             card.className = 'upgrade-card locked-tech';
-            card.innerHTML = `<h4>${upg.name}</h4><p>${upg.desc}</p><div class="button-container"><button class="ksp-button disabled-buy" disabled>🔒 Locked</button></div>`;
+            card.innerHTML = `<h4>${upg.name}</h4><p>${upg.desc}</p><div class="button-container"><button class="ksp-button disabled-buy techTree-button" disabled>🔒 Locked</button></div>`;
             continue;
         }
         
@@ -155,7 +155,7 @@ function renderUpgrades() {
             if (card.dataset.state === "unlocked") continue;
             card.dataset.state = "unlocked";
             card.className = 'upgrade-card unlocked-tech';
-            card.innerHTML = `<h4>${upg.name}</h4><p>${upg.desc}</p><div class="button-container"><button class="ksp-button" disabled>Researched</button></div>`;
+            card.innerHTML = `<h4>${upg.name}</h4><p>${upg.desc}</p><div class="button-container"><button class="ksp-button techTree-button" disabled>Researched</button></div>`;
             continue;
         }
 
@@ -164,7 +164,7 @@ function renderUpgrades() {
 
         card.dataset.state = currentState;
         card.className = 'upgrade-card available-tech';
-        const btnClass = canAfford ? 'ksp-button btn-blue upgrade-btn' : 'ksp-button disabled-buy';
+        const btnClass = canAfford ? 'ksp-button btn-blue upgrade-btn techTree-button' : 'ksp-button disabled-buy';
         const disabledAttr = canAfford ? '' : 'disabled';
         
         card.innerHTML = `<h4>${upg.name}</h4><p>${upg.desc}</p><div class="button-container"><button class="${btnClass}" ${disabledAttr} onclick="buyUpgrade('${key}')">Research (${formatNumber(upg.cost)} ${ICON_SCI})</button></div>`;
