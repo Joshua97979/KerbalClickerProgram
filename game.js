@@ -344,12 +344,18 @@ function claimContract(contractId) {
 function cyclePlanet(direction, onlyUnlocked = false) {
     let planetKeys = Object.keys(gameData.planets);
     if (planetKeys.length === 0) return;
+	
+	const isTutorialActive = typeof Tutorial !== 'undefined' && Tutorial.active;
+	
+	if (isTutorialActive) {
+        planetKeys = planetKeys.filter(key => key === 'kerbol' || key === 'kerbin' || key === 'mun');
+    }
     
-    if (!gameData.upgrades.betterTelescopes.unlocked) {
+    if (!isTutorialActive && !gameData.upgrades.betterTelescopes.unlocked) {
         planetKeys = planetKeys.filter(key => key !== 'dres');
     }
     
-    if (onlyUnlocked) {
+    if (!isTutorialActive && onlyUnlocked) {
         planetKeys = planetKeys.filter(key => gameData.planets[key].unlocked);
     }
     
@@ -388,12 +394,18 @@ function setWarpIndex(index) {
 }
 
 function attemptWarpUnlock() {
+	if (typeof Tutorial !== 'undefined' && Tutorial.active) return;
+	
     const nextLevel = gameData.maxWarpUnlocked + 1;
-    if (nextLevel >= warpLevels.length || gameData.totalScienceEarned < warpThresholds[nextLevel]) return;
+    if (nextLevel >= warpLevels.length) return;
+	if (gameData.totalScienceEarned < warpThresholds[nextLevel]) return;
+	
     showWarpUpgradeModal();
 }
 
 function executeWarpUpgrade() {
+	if (typeof Tutorial !== 'undefined' && Tutorial.active) return;
+	
     const nextLevel = gameData.maxWarpUnlocked + 1;
     if (nextLevel >= warpLevels.length) return;
     
@@ -613,6 +625,9 @@ const BASE_CLICK_COOLDOWN_MS = 200;
 function manualClick() {
     if (isPaused) return;
     if (gameData.upgrades.mechJeb.unlocked) return;
+	
+	const btnClick = document.getElementById('btn-click');
+    if (btnClick && btnClick.disabled) return;
     
     const now = Date.now();
     const currentWarpMult = getWarpMultiplier(currentWarpIndex);

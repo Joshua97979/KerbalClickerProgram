@@ -563,7 +563,7 @@ function checkContracts() {
         if (!card) {
             card = document.createElement('div');
             card.id = `contract-card-${contract.id}`;
-            card.className = 'action-card';
+            card.className = 'action-card contract-card';
             container.appendChild(card);
             card.innerHTML = `
                 <h3 style="color: var(--ksp-orange); font-size: 1rem;">${contract.title}</h3>
