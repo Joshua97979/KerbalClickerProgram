@@ -1,4 +1,4 @@
-# KSP Idle-Game
+# Kerbal Clicker Program
 A web-based incremental/clicker game inspired by the theme and aesthetics of **Kerbal Space Program (KSP)**. Build your space agency's economy, research new technologies, and explore the solar system—all managed from a dynamic, cartoon-style interactive star map.
 
 ## Overview
