@@ -1,5 +1,5 @@
 let debugMode = false;
-
+//Test
 document.addEventListener('DOMContentLoaded', initDebugMenu);
 
 function enableDebugMenu() {
