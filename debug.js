@@ -1,4 +1,4 @@
-let debugMode = true;
+let debugMode = false;
 
 document.addEventListener('DOMContentLoaded', initDebugMenu);
 
@@ -23,6 +23,9 @@ function initDebugMenu() {
 	document.getElementById('btn-cheat-total-science').addEventListener('click', cheatTotalScienceEarned);
 	document.getElementById('btn-cheat-planets').addEventListener('click', cheatUnlockPlanets);
 	
+    const btnCheatCurrentPlanet = document.getElementById('btn-cheat-current-planet');
+    if (btnCheatCurrentPlanet) btnCheatCurrentPlanet.addEventListener('click', cheatUnlockCurrentPlanet);
+    
 	createFpsVramOverlay();
 }
 
@@ -62,7 +65,6 @@ function cheatWarp() {
 function cheatFundsAndScience() {
     gameData.funds += 1000000000;
     gameData.science += 1000000000;
-    // totalScienceEarned wird ebenfalls erhöht, damit der reguläre Warp-Prestige-Balken keinen Fehler wirft
     gameData.totalScienceEarned += 1000000000; 
     
     if (typeof updateHeader === 'function') updateHeader();
@@ -110,6 +112,38 @@ function createFpsVramOverlay() {
     }
 
     requestAnimationFrame(updateStats);
+}
+
+function cheatUnlockCurrentPlanet() {
+    const pKey = gameData.selectedPlanet;
+    
+    if (!pKey) return;
+    if (pKey === 'kerbol') return;
+    
+    const p = gameData.planets[pKey];
+    if (!p) return;
+    if (p.unlocked) return;
+
+    p.unlocked = true;
+    p.isUnlocking = false;
+    p.hasFailed = false;
+    p.unlockProgress = 0;
+    p.failProgress = null;
+
+    if (typeof removeTransferVisual === 'function') removeTransferVisual(pKey);
+
+    const planetEl = document.getElementById(`planet-${pKey}`);
+    if (planetEl) planetEl.classList.remove('locked');
+
+    recalculateCache();
+
+    if (typeof updateHeader === 'function') updateHeader();
+    if (typeof updatePanel === 'function') updatePanel();
+
+    if (pKey !== 'dres') return;
+    
+    gameData.upgrades['betterTelescopes'].unlocked = true;
+    updatePlanetVisibility('dres');
 }
 
 function cheatUnlockPlanets() {

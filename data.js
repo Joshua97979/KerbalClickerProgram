@@ -104,7 +104,7 @@ const gameData = {
         kerbol: { id: 'kerbol', name: 'Kerbol', unlocked: true, desc: 'The massive central star of the system. The inexhaustible source of all light and heat.', unlockCost: 0, units: {} },
         moho: {
             id: 'moho', name: 'Moho', desc: 'The closest planet to Kerbol, baked by intense solar radiation and stripped of an atmosphere.',
-            unlocked: false, unlockCost: 7500, unlockReq: 'radiators', unlockTime: 420, isUnlocking: false, unlockProgress: 0, baseTransferChance: 0.15, rocketUpgradeBaseCost: 2500, rocketUpgrades: { a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 }, orbitDuration: 100, startAngle: 340, orbitWidth: 190, orbitHeight: 200, offsetY: -30, orbitColor: 'rgba(155, 126, 103, 0.5)', orbitParent: 'kerbol',
+            unlocked: false, unlockCost: 7500, unlockReq: 'radiators', unlockTime: 420, isUnlocking: false, unlockProgress: 0, baseTransferChance: 0.50, rocketUpgradeBaseCost: 2500, rocketUpgrades: { a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 }, orbitDuration: 100, startAngle: 340, orbitWidth: 190, orbitHeight: 200, offsetY: -30, orbitColor: 'rgba(155, 126, 103, 0.5)', orbitParent: 'kerbol',
             units: {
                 solarPowerPlant: { baseCost: 45000, costMult: 1.25, owned: 0, basePower: 400, max: 50 },
                 heatShieldProd: { baseCost: 15000, costMult: 1.25, owned: 0, basePower: 120, max: 50 },
@@ -113,7 +113,7 @@ const gameData = {
         },
         eve: {
             id: 'eve', name: 'Eve', desc: 'A dense, purple planet with a crushing atmosphere and extremely high gravity.',
-            unlocked: false, unlockCost: 7500, unlockReq: 'dartEngine', unlockTime: 420, isUnlocking: false, unlockProgress: 0, baseTransferChance: 0.15, rocketUpgradeBaseCost: 2500, rocketUpgrades: { a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 }, orbitDuration: 140, startAngle: 150, orbitWidth: 400, orbitHeight: 400, offsetY: 0, orbitColor: 'rgba(162, 75, 162, 0.5)', orbitParent: 'kerbol',
+            unlocked: false, unlockCost: 7500, unlockReq: 'dartEngine', unlockTime: 420, isUnlocking: false, unlockProgress: 0, baseTransferChance: 0.02, rocketUpgradeBaseCost: 2500, rocketUpgrades: { a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 }, orbitDuration: 140, startAngle: 150, orbitWidth: 400, orbitHeight: 400, offsetY: 0, orbitColor: 'rgba(162, 75, 162, 0.5)', orbitParent: 'kerbol',
             units: {
                 spaceElevator: { baseCost: 25000, costMult: 1.25, owned: 0, basePower: 300, max: 50 },
                 sstoFreighter: { baseCost: 85000, costMult: 1.25, owned: 0, basePower: 1000, max: 50 },
@@ -122,7 +122,7 @@ const gameData = {
         },
         gilly: {
             id: 'gilly', name: 'Gilly', desc: 'A tiny, potato-shaped asteroid captured by Eves gravity.',
-            unlocked: false, unlockCost: 1000, planetReq: 'eve', unlockTime: 420, isUnlocking: false, unlockProgress: 0, baseTransferChance: 0.20, rocketUpgradeBaseCost: 1000, rocketUpgrades: { a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 }, orbitDuration: 60, startAngle: 60, orbitWidth: 90, orbitHeight: 90, offsetY: 0, orbitColor: 'rgba(171, 131, 123, 0.5)', orbitParent: 'eve',
+            unlocked: false, unlockCost: 1000, planetReq: 'eve', unlockTime: 420, isUnlocking: false, unlockProgress: 0, baseTransferChance: 0.50, rocketUpgradeBaseCost: 1000, rocketUpgrades: { a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 }, orbitDuration: 60, startAngle: 60, orbitWidth: 90, orbitHeight: 90, offsetY: 0, orbitColor: 'rgba(171, 131, 123, 0.5)', orbitParent: 'eve',
             units: {
                 parachuteProd: { baseCost: 10000, costMult: 1.2, owned: 0, basePower: 110, max: 50 },
                 lowGravGolfCourse: { baseCost: 15000, costMult: 1.2, owned: 0, basePower: 150, max: 50 }
@@ -141,7 +141,7 @@ const gameData = {
         },
         mun: {
             id: 'mun', name: 'Mun', desc: 'The loyal companion of Kerbin. A dusty moon covered in deep craters.',
-            unlocked: false, unlockCost: 1000, planetReq: 'kerbin', unlockTime: 30, isUnlocking: false, unlockProgress: 0, baseTransferChance: 0.15, rocketUpgradeBaseCost: 250, rocketUpgrades: { a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 }, orbitDuration: 60, startAngle: 45, orbitWidth: 90, orbitHeight: 90, offsetY: 0, orbitColor: 'rgba(126, 126, 126, 0.7)', orbitParent: 'kerbin',
+            unlocked: false, unlockCost: 1000, planetReq: 'kerbin', unlockTime: 30, isUnlocking: false, unlockProgress: 0, baseTransferChance: 0.85, rocketUpgradeBaseCost: 250, rocketUpgrades: { a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 }, orbitDuration: 60, startAngle: 45, orbitWidth: 90, orbitHeight: 90, offsetY: 0, orbitColor: 'rgba(126, 126, 126, 0.7)', orbitParent: 'kerbin',
             units: {
                 he3Extractor: { baseCost: 8000, costMult: 1.25, owned: 0, basePower: 100, max: 50 },
                 regolithLab: { baseCost: 1200, costMult: 1.3, owned: 0, basePower: 6, max: 50 }
@@ -149,7 +149,7 @@ const gameData = {
         },
         minmus: {
             id: 'minmus', name: 'Minmus', desc: 'A tiny, mint-green moon. Researchers still speculate whether it is made of mint ice cream.',
-            unlocked: false, unlockCost: 2500, planetReq: 'kerbin', unlockTime: 60, isUnlocking: false, unlockProgress: 0, baseTransferChance: 0.15, rocketUpgradeBaseCost: 400, rocketUpgrades: { a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 }, orbitDuration: 110, startAngle: 230, orbitWidth: 140, orbitHeight: 140, offsetY: 0, orbitColor: 'rgba(162, 255, 204, 0.5)', orbitParent: 'kerbin',
+            unlocked: false, unlockCost: 2500, planetReq: 'kerbin', unlockTime: 50, isUnlocking: false, unlockProgress: 0, baseTransferChance: 0.75, rocketUpgradeBaseCost: 400, rocketUpgrades: { a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 }, orbitDuration: 110, startAngle: 230, orbitWidth: 140, orbitHeight: 140, offsetY: 0, orbitColor: 'rgba(162, 255, 204, 0.5)', orbitParent: 'kerbin',
             units: {
                 mintIceCream: { baseCost: 3500, costMult: 1.2, owned: 0, basePower: 45, max: 50 },
                 jetpackCourse: { baseCost: 4500, costMult: 1.2, owned: 0, basePower: 60, max: 50 }
@@ -157,7 +157,7 @@ const gameData = {
         },
         duna: {
             id: 'duna', name: 'Duna', desc: 'The rusty red desert planet. Its thin atmosphere requires giant parachutes for a safe landing.',
-            unlocked: false, unlockCost: 15000, unlockReq: 'drogueChute', unlockTime: 120, isUnlocking: false, unlockProgress: 0, baseTransferChance: 0.10, rocketUpgradeBaseCost: 4000, rocketUpgrades: { a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 }, orbitDuration: 350, startAngle: 290, orbitWidth: 950, orbitHeight: 950, offsetY: 0, orbitColor: 'rgba(212, 60, 25, 0.5)', orbitParent: 'kerbol',
+            unlocked: false, unlockCost: 15000, unlockReq: 'drogueChute', unlockTime: 120, isUnlocking: false, unlockProgress: 0, baseTransferChance: 0.50, rocketUpgradeBaseCost: 4000, rocketUpgrades: { a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 }, orbitDuration: 350, startAngle: 290, orbitWidth: 950, orbitHeight: 950, offsetY: 0, orbitColor: 'rgba(212, 60, 25, 0.5)', orbitParent: 'kerbol',
             units: {
                 spaceyLifter: { baseCost: 28000, costMult: 1.25, owned: 0, basePower: 350, max: 50 },
                 duneBuggyRally: { baseCost: 32000, costMult: 1.25, owned: 0, basePower: 400, max: 50 },
@@ -166,7 +166,7 @@ const gameData = {
         },
         ike: {
             id: 'ike', name: 'Ike', desc: 'A dark, rocky moon tightly bound to Duna, often blocking its sunlight.',
-            unlocked: false, unlockCost: 20000, planetReq: 'duna', unlockTime: 145, isUnlocking: false, unlockProgress: 0, baseTransferChance: 0.15, rocketUpgradeBaseCost: 5000, rocketUpgrades: { a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 }, orbitDuration: 50, startAngle: 30, orbitWidth: 120, orbitHeight: 120, offsetY: 0, orbitColor: 'rgba(180, 180, 180, 0.5)', orbitParent: 'duna',
+            unlocked: false, unlockCost: 20000, planetReq: 'duna', unlockTime: 145, isUnlocking: false, unlockProgress: 0, baseTransferChance: 0.60, rocketUpgradeBaseCost: 5000, rocketUpgrades: { a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 }, orbitDuration: 50, startAngle: 30, orbitWidth: 120, orbitHeight: 120, offsetY: 0, orbitColor: 'rgba(180, 180, 180, 0.5)', orbitParent: 'duna',
             units: {
                 craterResearch: { baseCost: 15000, costMult: 1.3, owned: 0, basePower: 45, max: 50 },
                 telescopeObs: { baseCost: 18000, costMult: 1.3, owned: 0, basePower: 60, max: 50 }
@@ -174,7 +174,7 @@ const gameData = {
         },
         dres: {
             id: 'dres', name: 'Dres', desc: 'The forgotten world drifting quietly in the asteroid belt between Duna and Jool.',
-            unlocked: false, unlockCost: 15000, unlockReq: 'betterTelescopes', unlockTime: 420, isUnlocking: false, unlockProgress: 0, baseTransferChance: 0.05, rocketUpgradeBaseCost: 6000, rocketUpgrades: { a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 }, orbitDuration: 800, startAngle: 170, orbitWidth: 1440, orbitHeight: 1600, offsetY: 100, orbitColor: 'rgba(89, 63, 48, 0.7)', orbitParent: 'kerbol',
+            unlocked: false, unlockCost: 15000, unlockReq: 'betterTelescopes', unlockTime: 420, isUnlocking: false, unlockProgress: 0, baseTransferChance: 0.45, rocketUpgradeBaseCost: 6000, rocketUpgrades: { a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 }, orbitDuration: 800, startAngle: 170, orbitWidth: 1440, orbitHeight: 1600, offsetY: 100, orbitColor: 'rgba(89, 63, 48, 0.7)', orbitParent: 'kerbol',
             units: {
                 dresDenialCenter: { baseCost: 40000, costMult: 1.25, owned: 0, basePower: 500, max: 50 },
                 amnesiaField: { baseCost: 35000, costMult: 1.3, owned: 0, basePower: 120, max: 50 }
@@ -182,7 +182,7 @@ const gameData = {
         },
         jool: {
             id: 'jool', name: 'Jool', desc: 'A giant gas planet with an unmistakable green color. The gravitational heart of the outer system.',
-            unlocked: false, unlockCost: 50000, unlockReq: 'aerocapture', unlockTime: 420, isUnlocking: false, unlockProgress: 0, baseTransferChance: 0.05, rocketUpgradeBaseCost: 10000, rocketUpgrades: { a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 }, orbitDuration: 1200, startAngle: 280, orbitWidth: 2410, orbitHeight: 2410, offsetY: 0, orbitColor: 'rgba(75, 203, 75, 0.5)', orbitParent: 'kerbol',
+            unlocked: false, unlockCost: 50000, unlockReq: 'aerocapture', unlockTime: 420, isUnlocking: false, unlockProgress: 0, baseTransferChance: 0.35, rocketUpgradeBaseCost: 10000, rocketUpgrades: { a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 }, orbitDuration: 1200, startAngle: 280, orbitWidth: 2410, orbitHeight: 2410, offsetY: 0, orbitColor: 'rgba(75, 203, 75, 0.5)', orbitParent: 'kerbol',
             units: {
                 cloudCityHotel: { baseCost: 90000, costMult: 1.25, owned: 0, basePower: 1200, max: 50 },
                 he4Extractor: { baseCost: 120000, costMult: 1.3, owned: 0, basePower: 1600, max: 50 },
@@ -191,7 +191,7 @@ const gameData = {
         },
         laythe: {
             id: 'laythe', name: 'Laythe', desc: 'An inner, ocean-covered moon with an oxygen-rich atmosphere orbiting the gas giant Jool.',
-            unlocked: false, unlockCost: 60000, planetReq: 'jool', unlockReq: 'rapierEngine', unlockTime: 420, isUnlocking: false, unlockProgress: 0, baseTransferChance: 0.10, rocketUpgradeBaseCost: 12000, rocketUpgrades: { a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 }, orbitDuration: 70, startAngle: 180, orbitWidth: 120, orbitHeight: 120, offsetY: 0, orbitColor: 'rgba(18, 86, 130, 0.5)', orbitParent: 'jool',
+            unlocked: false, unlockCost: 60000, planetReq: 'jool', unlockReq: 'rapierEngine', unlockTime: 420, isUnlocking: false, unlockProgress: 0, baseTransferChance: 0.30, rocketUpgradeBaseCost: 12000, rocketUpgrades: { a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 }, orbitDuration: 70, startAngle: 180, orbitWidth: 120, orbitHeight: 120, offsetY: 0, orbitColor: 'rgba(18, 86, 130, 0.5)', orbitParent: 'jool',
             units: {
                 submersible: { baseCost: 55000, costMult: 1.3, owned: 0, basePower: 190, max: 50 },
                 greenhouse: { baseCost: 65000, costMult: 1.3, owned: 0, basePower: 220, max: 50 },
@@ -200,7 +200,7 @@ const gameData = {
         },
         vall: {
             id: 'vall', name: 'Vall', desc: 'A frozen, icy moon orbiting Jool with a thick, icy crust concealing a hidden subsurface ocean.',
-            unlocked: false, unlockCost: 1000, planetReq: 'jool', unlockTime: 420, isUnlocking: false, unlockProgress: 0, baseTransferChance: 0.10, rocketUpgradeBaseCost: 12000, rocketUpgrades: { a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 }, orbitDuration: 110, startAngle: 90, orbitWidth: 180, orbitHeight: 180, offsetY: 0, orbitColor: 'rgba(107, 131, 143, 0.5)', orbitParent: 'jool',
+            unlocked: false, unlockCost: 1000, planetReq: 'jool', unlockTime: 420, isUnlocking: false, unlockProgress: 0, baseTransferChance: 0.50, rocketUpgradeBaseCost: 12000, rocketUpgrades: { a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 }, orbitDuration: 110, startAngle: 90, orbitWidth: 180, orbitHeight: 180, offsetY: 0, orbitColor: 'rgba(107, 131, 143, 0.5)', orbitParent: 'jool',
             units: {
                 waterSample: { baseCost: 20000, costMult: 1.25, owned: 0, basePower: 250, max: 50 },
                 raspberryIceCream: { baseCost: 25000, costMult: 1.25, owned: 0, basePower: 320, max: 50 },
@@ -217,7 +217,7 @@ const gameData = {
         },
         bop: {
             id: 'bop', name: 'Bop', desc: 'A captured, irregularly shaped asteroid moon wandering the outer edges of the Jool system.',
-            unlocked: false, unlockCost: 1000, planetReq: 'jool', unlockTime: 420, isUnlocking: false, unlockProgress: 0, baseTransferChance: 0.85, rocketUpgradeBaseCost: 15000, rocketUpgrades: { a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 }, orbitDuration: 280, startAngle: 40, orbitWidth: 360, orbitHeight: 360, offsetY: 0, orbitColor: 'rgba(63, 54, 52, 0.5)', orbitParent: 'jool',
+            unlocked: false, unlockCost: 1000, planetReq: 'jool', unlockTime: 420, isUnlocking: false, unlockProgress: 0, baseTransferChance: 0.50, rocketUpgradeBaseCost: 15000, rocketUpgrades: { a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 }, orbitDuration: 280, startAngle: 40, orbitWidth: 360, orbitHeight: 360, offsetY: 0, orbitColor: 'rgba(63, 54, 52, 0.5)', orbitParent: 'jool',
             units: {
                 lowGRoverTest: { baseCost: 40000, costMult: 1.25, owned: 0, basePower: 450, max: 50 },
                 krakenContainment: { baseCost: 60000, costMult: 1.3, owned: 0, basePower: 250, max: 50 }
@@ -225,7 +225,7 @@ const gameData = {
         },
         pol: {
             id: 'pol', name: 'Pol', desc: 'The smallest and outermost moon of Jool, resembling a dusty pollen grain floating in space.',
-            unlocked: false, unlockCost: 1000, planetReq: 'jool', unlockTime: 420, isUnlocking: false, unlockProgress: 0, baseTransferChance: 0.85, rocketUpgradeBaseCost: 15000, orbitDuration: 400, startAngle: 300, orbitWidth: 475, orbitHeight: 500, offsetY: 30, orbitColor: 'rgba(223, 162, 115, 0.4)', orbitParent: 'jool',
+            unlocked: false, unlockCost: 1000, planetReq: 'jool', unlockTime: 420, isUnlocking: false, unlockProgress: 0, baseTransferChance: 0.65, rocketUpgradeBaseCost: 15000, orbitDuration: 400, startAngle: 300, orbitWidth: 475, orbitHeight: 500, offsetY: 30, orbitColor: 'rgba(223, 162, 115, 0.4)', orbitParent: 'jool',
             units: {
                 fuelRefinery: { baseCost: 35000, costMult: 1.25, owned: 0, basePower: 380, max: 50 },
                 lowGravMobility: { baseCost: 45000, costMult: 1.3, owned: 0, basePower: 200, max: 50 }
@@ -233,7 +233,7 @@ const gameData = {
         },
         eeloo: {
             id: 'eeloo', name: 'Eeloo', desc: 'A white, ice-covered dwarf planet at the edge of the system.',
-            unlocked: false, unlockCost: 100000, unlockReq: 'rtg', unlockTime: 420, isUnlocking: false, unlockProgress: 0, baseTransferChance: 0.85, rocketUpgradeBaseCost: 15000, rocketUpgrades: { a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 }, orbitDuration: 1900, startAngle: 60, orbitWidth: 2520, orbitHeight: 2800, offsetY: -250, orbitColor: 'rgba(220, 220, 220, 0.4)', orbitParent: 'kerbol',
+            unlocked: false, unlockCost: 100000, unlockReq: 'rtg', unlockTime: 420, isUnlocking: false, unlockProgress: 0, baseTransferChance: 0.50, rocketUpgradeBaseCost: 15000, rocketUpgrades: { a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 }, orbitDuration: 1900, startAngle: 60, orbitWidth: 2520, orbitHeight: 2800, offsetY: -250, orbitColor: 'rgba(220, 220, 220, 0.4)', orbitParent: 'kerbol',
             units: {
                 exoticIceCream: { baseCost: 150000, costMult: 1.25, owned: 0, basePower: 2000, max: 50 },
                 cryoLab: { baseCost: 130000, costMult: 1.3, owned: 0, basePower: 450, max: 50 }
