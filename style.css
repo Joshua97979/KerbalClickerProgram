@@ -335,6 +335,23 @@ body {
     border-radius: 6px 0 0 6px;
 }
 
+/* =========================================
+   Responsive R&D Button Text (Desktop)
+   ========================================= */
+.rnd-text-short {
+    display: none;
+}
+
+/* Passe die 1450px an, falls es auf deinem Monitor früher oder später gequetscht wirkt */
+@media screen and (max-width: 1600px) {
+    .rnd-text-long {
+        display: none;
+    }
+    .rnd-text-short {
+        display: inline;
+    }
+}
+
 #rnd-indicator {
     height: 100%;
     width: 40px;
