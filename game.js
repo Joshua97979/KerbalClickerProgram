@@ -6,6 +6,8 @@ let isPaused = false;
 let currentWarpIndex = 0;
 let currentBuyMode = 1;
 
+const MOBILE_BREAKPOINT = 1000;
+
 // DOM Cache-Objekte zur Vermeidung von Layout-Thrashing & redundanten DOM-Lookups
 const wrapperCache = {};
 const targetElCache = {};
@@ -245,8 +247,16 @@ let mapCenter = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 
 function updateMapDimensions() {
     if (!mapSection) return;
+	
     const rect = mapSection.getBoundingClientRect();
     mapCenter.x = rect.left + rect.width / 2;
+	
+	if (window.innerWidth <= MOBILE_BREAKPOINT) {
+        // Mobile Ansicht: Planet in der Mitte der oberen 50% zentrieren (also bei 25%)
+        mapCenter.y = rect.top + (rect.height * 0.25);
+        return;
+    }
+	
     mapCenter.y = rect.top + rect.height / 2;
 }
 window.addEventListener('resize', updateMapDimensions);
@@ -907,10 +917,16 @@ function executeReset() { isResetting = true; localStorage.removeItem('kspIdleSa
 function resetGame() { showResetConfirm(); }
 
 const mapControls = document.getElementById('map-controls');
-if (mapControls) mapControls.addEventListener('mousedown', (e) => e.stopPropagation());
+if (mapControls) {
+	mapControls.addEventListener('mousedown', (e) => e.stopPropagation());
+	mapControls.addEventListener('touchstart', (e) => e.stopPropagation());
+}
 
 const topUiLayer = document.getElementById('top-ui-layer');
-if (topUiLayer) topUiLayer.addEventListener('mousedown', (e) => e.stopPropagation());
+if (topUiLayer) {
+	topUiLayer.addEventListener('mousedown', (e) => e.stopPropagation());
+	topUiLayer.addEventListener('touchstart', (e) => e.stopPropagation());
+}
 
 if (typeof generateUnitCards === 'function') {
     generateUnitCards();
@@ -1011,6 +1027,85 @@ window.addEventListener('mousemove', (e) => {
 });
 
 window.addEventListener('mouseup', () => {
+    isDraggingMap = false;
+    setTimeout(() => { wasDragging = false; }, 50);
+});
+
+let initialPinchDistance = null;
+
+mapSection.addEventListener('touchstart', (e) => {
+    // 2-Finger-Geste für Zoom
+    if (e.touches.length === 2) {
+        isDraggingMap = false;
+        initialPinchDistance = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+        );
+        return;
+    }
+
+    // Abbrechen, wenn es nicht genau 1 Finger ist
+    if (e.touches.length !== 1) return;
+
+    // 1-Finger-Geste für Panning
+    isDraggingMap = true;
+    wasDragging = false;
+    cameraTarget = null;
+    dragStartX = e.touches[0].clientX - mapPanX;
+    dragStartY = e.touches[0].clientY - mapPanY;
+    dragStartCoords = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+}, { passive: false });
+
+window.addEventListener('touchmove', (e) => {
+    // Zoom-Logik (Pinch)
+    if (e.touches.length === 2) {
+        if (initialPinchDistance === null) return;
+        e.preventDefault(); 
+        
+        const currentDistance = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+        );
+        
+        const pinchRatio = currentDistance / initialPinchDistance;
+        
+        if (pinchRatio > 1.05) {
+            applyZoom(mapScale + 0.05);
+            initialPinchDistance = currentDistance;
+            return;
+        }
+        
+        if (pinchRatio < 0.95) {
+            applyZoom(mapScale - 0.05);
+            initialPinchDistance = currentDistance;
+            return;
+        }
+        return;
+    }
+
+    // Panning-Logik
+    if (!isDraggingMap) return;
+    if (e.touches.length !== 1) return;
+
+    if (Math.abs(e.touches[0].clientX - dragStartCoords.x) > 5 || Math.abs(e.touches[0].clientY - dragStartCoords.y) > 5) {
+        wasDragging = true;
+    }
+    
+    mapPanX = e.touches[0].clientX - dragStartX;
+    mapPanY = e.touches[0].clientY - dragStartY;
+    
+    if (typeof updateMapTransform === 'function') {
+        updateMapTransform();
+    }
+}, { passive: false });
+
+window.addEventListener('touchend', (e) => {
+    if (e.touches.length < 2) {
+        initialPinchDistance = null;
+    }
+    
+    if (e.touches.length !== 0) return;
+    
     isDraggingMap = false;
     setTimeout(() => { wasDragging = false; }, 50);
 });
@@ -1133,6 +1228,8 @@ let mouseY = 0;
 // Event-Delegation am Map-Container für Tooltips (schont Arbeitsspeicher und reduziert VRAM-Overhead)
 if (mapContent) {
     mapContent.addEventListener('mouseenter', (e) => {
+		if (window.innerWidth <= MOBILE_BREAKPOINT) return;
+		
         const p = e.target.closest('.planet, .sun');
         if (!p) return;
 
@@ -1153,6 +1250,8 @@ if (mapContent) {
     }, true);
 
     mapContent.addEventListener('mousemove', (e) => {
+		if (window.innerWidth <= MOBILE_BREAKPOINT) return;
+		
         mouseX = e.clientX;
         mouseY = e.clientY;
         if (!tooltipEl.classList.contains('hidden')) {
@@ -1386,8 +1485,17 @@ document.addEventListener('visibilitychange', () => {
     }
 });
 
+function updateMobileState() {
+    if (window.innerWidth <= MOBILE_BREAKPOINT) {
+        document.body.classList.add('is-mobile');
+        return;
+    }
+    document.body.classList.remove('is-mobile');
+}
+window.addEventListener('resize', updateMobileState);
 
 document.addEventListener('DOMContentLoaded', () => {
+	updateMobileState();
 	loadGame();
 	initLabelsSetting();
 	updateHeader();
@@ -1405,4 +1513,5 @@ document.addEventListener('DOMContentLoaded', () => {
 	updateMapTransform();
 	updateMusicIcons();
 	updateSoundIcons();
+	switchMobileTab('action');
 });

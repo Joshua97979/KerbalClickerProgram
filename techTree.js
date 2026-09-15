@@ -8,14 +8,24 @@ let isDraggingTech = false;
 let techDragStartX = 0;
 let techDragStartY = 0;
 
+// Neue Variablen für Mobile Touch (Pan & Zoom)
+let initialTechPinchDistance = null;
+let techDragStartCoords = { x: 0, y: 0 };
+
 function initTechTree() {
     const techContainer = document.getElementById('upgrades-container');
     if (!techContainer) return;
 
+    // Desktop Events
     techContainer.addEventListener('mousedown', handleTechDragStart);
     window.addEventListener('mousemove', handleTechDragMove);
     window.addEventListener('mouseup', handleTechDragEnd);
     techContainer.addEventListener('wheel', handleTechZoom, { passive: false });
+    
+    // Mobile Touch Events
+    techContainer.addEventListener('touchstart', handleTechTouchStart, { passive: false });
+    window.addEventListener('touchmove', handleTechTouchMove, { passive: false });
+    window.addEventListener('touchend', handleTechTouchEnd);
     
     window.addEventListener('resize', handleTechResize);
 }
@@ -58,8 +68,93 @@ function handleTechZoom(e) {
     updateTechTransform();
 }
 
+// --- Mobile Touch Handler (Neu) ---
+
+function handleTechTouchStart(e) {
+    // 2-Finger-Geste für Zoom (Pinch)
+    if (e.touches.length === 2) {
+        isDraggingTech = false;
+        initialTechPinchDistance = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+        );
+        return;
+    }
+
+    if (e.touches.length !== 1) return;
+    if (e.target.closest('button')) return; // Buttons normal klickbar lassen
+
+    // 1-Finger-Geste für Panning
+    isDraggingTech = true;
+    techDragStartX = e.touches[0].clientX - techPanX;
+    techDragStartY = e.touches[0].clientY - techPanY;
+    techDragStartCoords = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+}
+
+function handleTechTouchMove(e) {
+    // Zoom-Logik (Pinch)
+    if (e.touches.length === 2) {
+        if (initialTechPinchDistance === null) return;
+        e.preventDefault(); 
+        
+        const currentDistance = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+        );
+        
+        const pinchRatio = currentDistance / initialTechPinchDistance;
+        
+        if (pinchRatio <= 1.05 && pinchRatio >= 0.95) return;
+
+        const oldScale = techScale;
+        const delta = pinchRatio > 1.05 ? 0.05 : -0.05;
+        techScale = Math.max(0.3, Math.min(techScale + delta, 3));
+
+        // Zentrum des Pinches berechnen, damit wir an die richtige Stelle zoomen
+        const touchCenterX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        const touchCenterY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        
+        const techContainer = document.getElementById('upgrades-container');
+        const rect = techContainer ? techContainer.getBoundingClientRect() : { left: 0, top: 0 };
+        
+        const localX = touchCenterX - rect.left;
+        const localY = touchCenterY - rect.top;
+        const scaleRatio = techScale / oldScale;
+
+        techPanX = localX - (localX - techPanX) * scaleRatio;
+        techPanY = localY - (localY - techPanY) * scaleRatio;
+
+        initialTechPinchDistance = currentDistance;
+        updateTechTransform();
+        return;
+    }
+
+    // Panning-Logik
+    if (!isDraggingTech) return;
+    if (e.touches.length !== 1) return;
+    
+    // Verhindert das Scrollen der Seite, während wir den Tech-Tree verschieben
+    e.preventDefault();
+
+    techPanX = e.touches[0].clientX - techDragStartX;
+    techPanY = e.touches[0].clientY - techDragStartY;
+    updateTechTransform();
+}
+
+function handleTechTouchEnd(e) {
+    if (e.touches.length < 2) {
+        initialTechPinchDistance = null;
+    }
+    
+    if (e.touches.length === 0) {
+        isDraggingTech = false;
+    }
+}
+
+// --- Ende Mobile Touch Handler ---
+
 function updateTechTransform() {
-    const content = document.getElementById('upgrades-content'); // Setzt einen Wrapper im Container voraus
+    const content = document.getElementById('upgrades-content'); 
     if (!content) return;
     content.style.transform = `translate(${techPanX}px, ${techPanY}px) scale(${techScale})`;
 }
@@ -111,7 +206,6 @@ function renderUpgrades() {
     const rndScienceDisplay = document.getElementById('rnd-science-display');
     if (rndScienceDisplay) rndScienceDisplay.innerHTML = `(Current: ${formatNumber(gameData.science)} ${ICON_SCI})`;
 
-    // Dynamische Dummys generieren (Flache Hierarchie mit Invertierung)
     if (gameData.techDummies) {
         for (const dummyData of gameData.techDummies) {
             let dummy = document.getElementById(dummyData.id);
@@ -221,7 +315,6 @@ function drawTechLines() {
 
             let d = '';
             
-            // Generische Prüfung, ob ein Dummy für diese spezifische Verbindung existiert
             const dummyData = gameData.techDummies ? gameData.techDummies.find(dum => dum.target === key && dum.source === reqKey) : null;
             const dummyCard = dummyData ? document.getElementById(dummyData.id) : null;
 
@@ -256,5 +349,4 @@ function drawTechLines() {
     canvas.style.transform = oldTransform;
 }
 
-// Initialisierung nach dem Laden des DOMs
 document.addEventListener('DOMContentLoaded', initTechTree);

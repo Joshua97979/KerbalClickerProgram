@@ -10,6 +10,15 @@
 </head>
 <body>
     <main id="game-container">
+		<div id="mobile-tab-nav" class="hidden-desktop">
+            <button id="tab-mission" class="mobile-tab active" onclick="switchMobileTab('mission')">Missions</button>
+            <button id="tab-action" class="mobile-tab" onclick="switchMobileTab('action')">Economy</button>
+			<button id="tab-rnd" class="mobile-tab" onclick="document.getElementById('btn-rnd').click()">
+				<div id="mobile-tab-rnd-text">RESEARCH</div>
+				<div id="mobile-rnd-indicator" class="hidden">!</div>
+			</button>
+        </div>
+	
         <aside id="mission-panel" class="side-panel">
             <h2 id="leftPanel-title">Mission Control</h2>
             <div id="missions-container">

@@ -603,8 +603,10 @@ function checkContracts() {
 }
 
 function updateRndIndicator() {
-    const indicator = document.getElementById('rnd-indicator');
-    if (!indicator) return;
+	const desktopIndicator = document.getElementById('rnd-indicator');
+    const mobileIndicator = document.getElementById('mobile-rnd-indicator');
+	
+    if (!desktopIndicator || !mobileIndicator) return;
 
     let canAfford = false;
     for (const key in gameData.upgrades) {
@@ -616,8 +618,13 @@ function updateRndIndicator() {
         break;
     }
 
-    if (canAfford) indicator.classList.remove('hidden');
-    else indicator.classList.add('hidden');
+    if (canAfford) {
+		desktopIndicator.classList.remove('hidden');
+		mobileIndicator.classList.remove('hidden');
+	} else {
+		desktopIndicator.classList.add('hidden');
+		mobileIndicator.classList.add('hidden');
+	}
 }
 
 function updateWarpProgress() {
@@ -878,4 +885,37 @@ function updateRocketUpgradesUI() {
     if (chancePct > 80) chanceColor = 'var(--ksp-green, #b4d455)';
 
     chanceTextEl.innerHTML = `Success Chance: <span style="color: ${chanceColor};">${chancePct}%</span>`;
+}
+
+// Neue Funktion zum Wechseln der Mobile-Tabs
+function switchMobileTab(tab) {
+	if (!tab) return;
+	
+	if (window.innerWidth > MOBILE_BREAKPOINT) return;
+	
+    const missionPanel = document.getElementById('mission-panel')
+    const actionPanel = document.getElementById('action-panel')
+    const tabMission = document.getElementById('tab-mission')
+    const tabAction = document.getElementById('tab-action')
+    
+    if (!missionPanel || !actionPanel) return
+    
+	missionPanel.classList.add('mobile-hidden');
+    actionPanel.classList.add('mobile-hidden');
+	
+	if (tabMission) tabMission.classList.remove('active');
+    if (tabAction) tabAction.classList.remove('active');
+	
+	
+    if (tab === 'mission') {
+		missionPanel.classList.remove('mobile-hidden')
+		if (tabMission) tabMission.classList.add('active');
+        return
+    }
+	
+	if (tab === 'action') {
+		actionPanel.classList.remove('mobile-hidden')
+		if (tabAction) tabAction.classList.add('active');
+        return
+    }
 }
