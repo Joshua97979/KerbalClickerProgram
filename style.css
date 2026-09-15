@@ -6,6 +6,7 @@
 	--text-main: #e0e0e0;
 	--ksp-blue: #3498db;
 	--ksp-red: #e74c3c;
+	touch-action: manipulation;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; font-weight: bold; }
