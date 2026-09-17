@@ -192,9 +192,71 @@ function toggleRndModal() {
         const canvasHeight = canvas.scrollHeight;
         canvas.style.transform = oldTransform;
 
-        techScale = Math.max(0.3, Math.min(1, cRect.width / (canvasWidth + 80), cRect.height / (canvasHeight + 80)));
-        techPanX = (cRect.width - (canvasWidth * techScale)) / 2;
+        // Suche nach der am weitesten links liegenden, noch nicht erforschten Spalte (Tier)
+        let minTier = Infinity;
+
+        for (const key in gameData.upgrades) {
+            const upg = gameData.upgrades[key];
+            if (upg.unlocked) continue; 
+            if (upg.tier >= minTier) continue; 
+
+            minTier = upg.tier;
+        }
+
+        // Wenn alles erforscht ist, herauszoomen und komplett zentrieren
+        if (minTier === Infinity) {
+            techScale = Math.max(0.3, Math.min(1, cRect.width / (canvasWidth + 80), cRect.height / (canvasHeight + 80)));
+            techPanX = (cRect.width - (canvasWidth * techScale)) / 2;
+            techPanY = (cRect.height - (canvasHeight * techScale)) / 2;
+            updateTechTransform();
+            return;
+        }
+
+        // Finde alle Upgrades in der Ziel-Spalte für die vertikale Ausdehnung
+        let minTop = Infinity;
+        let maxBottom = -Infinity;
+        let targetX = null;
+
+        for (const key in gameData.upgrades) {
+            const upg = gameData.upgrades[key];
+            if (upg.tier !== minTier) continue;
+            
+            const card = document.getElementById(`upgrade-card-${key}`);
+            if (!card) continue;
+            
+            minTop = Math.min(minTop, card.offsetTop);
+            maxBottom = Math.max(maxBottom, card.offsetTop + card.offsetHeight);
+            targetX = card.offsetLeft + (card.offsetWidth / 2);
+        }
+
+        // Fallback, falls DOM-Elemente unerwartet fehlen
+        if (targetX === null) {
+            techScale = 0.7;
+            techPanX = (cRect.width - (canvasWidth * techScale)) / 2;
+            techPanY = (cRect.height - (canvasHeight * techScale)) / 2;
+            updateTechTransform();
+            return;
+        }
+
+        // Dynamischen Zoom-Faktor berechnen
+        const canvasCenterY = canvasHeight / 2;
+        const maxDistFromCenter = Math.max(canvasCenterY - minTop, maxBottom - canvasCenterY);
+        
+        // Benötigte Höhe, um alle Elemente der Spalte + 120px Padding anzuzeigen
+        const requiredHeight = (maxDistFromCenter * 2) + 120;
+        
+        let calculatedScale = cRect.height / requiredHeight;
+
+        // Limitiere den Zoom-In auf 0.7 (als Minimum-Distanz / maximaler Zoom für 1-2 Upgrades)
+        techScale = Math.min(0.7, calculatedScale);
+        
+        // Limitiere den Zoom-Out auf das globale Minimum von 0.3
+        techScale = Math.max(0.3, techScale);
+
+        // Kamera positionieren
         techPanY = (cRect.height - (canvasHeight * techScale)) / 2;
+        techPanX = (cRect.width / 2) - (targetX * techScale);
+        
         updateTechTransform();
     }, 10);
 }
