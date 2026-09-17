@@ -1485,12 +1485,30 @@ document.addEventListener('visibilitychange', () => {
     }
 });
 
+let wasMobileView = null; // Speichert den vorherigen Ansichts-Zustand
+
 function updateMobileState() {
-    if (window.innerWidth <= MOBILE_BREAKPOINT) {
-        document.body.classList.add('is-mobile');
+    const isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
+
+    // Wenn Desktop-Ansicht: Klasse entfernen und Zustand merken, dann sofort abbrechen
+    if (!isMobile) {
+        document.body.classList.remove('is-mobile');
+        wasMobileView = false;
         return;
     }
-    document.body.classList.remove('is-mobile');
+
+    // Ab hier sind wir sicher in der Mobile-Ansicht
+    document.body.classList.add('is-mobile');
+
+    // Wenn wir vorher schon im Mobile-Modus waren, ist nichts weiter zu tun
+    if (wasMobileView === true) return;
+    
+    // Status aktualisieren, da wir gerade in den Mobile-Modus gewechselt sind
+    wasMobileView = true;
+
+    if (typeof switchMobileTab === 'function') {
+        switchMobileTab('action');
+    }
 }
 window.addEventListener('resize', updateMobileState);
 
