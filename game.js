@@ -932,13 +932,32 @@ if (typeof generateUnitCards === 'function') {
     generateUnitCards();
 }
 
+let clickHoldInterval = null;
+
+function startClickHold(e) {
+    if (e && e.cancelable) e.preventDefault(); // Verhindert z. B. doppelte Klicks auf mobilen Geräten
+    manualClick();
+    
+    if (clickHoldInterval) return;
+    clickHoldInterval = setInterval(manualClick, 50);
+}
+
+function stopClickHold() {
+    if (!clickHoldInterval) return;
+    
+    clearInterval(clickHoldInterval);
+    clickHoldInterval = null;
+}
+
 const btnClick = document.getElementById('btn-click');
 if (btnClick) {
-    btnClick.addEventListener('click', manualClick);
-						  
-		   
-	   
-	
+    btnClick.addEventListener('mousedown', startClickHold);
+    btnClick.addEventListener('touchstart', startClickHold, { passive: false });
+    
+    btnClick.addEventListener('mouseup', stopClickHold);
+    btnClick.addEventListener('mouseleave', stopClickHold);
+    btnClick.addEventListener('touchend', stopClickHold);
+    btnClick.addEventListener('touchcancel', stopClickHold);
 }
 
 document.getElementById('btn-unlock').addEventListener('click', unlockSelectedPlanet);
