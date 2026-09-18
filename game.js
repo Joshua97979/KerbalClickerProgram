@@ -1291,31 +1291,76 @@ if (mapContent) {
     }, true);
 }
 
-const toggleSlider = document.getElementById('buy-toggle-slider');
+// Zentrale Funktion zum Setzen des Kauf-Modus
+function setBuyMode(mode) {
+    currentBuyMode = mode;
+    
+    // Mobile Toggle Button aktualisieren
+    const mobileBuyToggle = document.getElementById('mobile-buy-toggle');
+    if (mobileBuyToggle) {
+        mobileBuyToggle.innerText = mode === 'MAX' ? 'MAX' : mode + 'x';
+    }
+	
+	// Desktop Slider
+	const toggleSlider = document.getElementById('buy-toggle-slider');
+    if (toggleSlider) {
+        toggleSlider.style.opacity = mode === 1 ? '0' : '1';
+    }
+    
+    document.querySelectorAll('.buy-toggle-btn').forEach((btn, index) => {
+        btn.classList.remove('active');
+		
+        const btnModeRaw = btn.getAttribute('data-mode');
+        const btnMode = btnModeRaw === 'MAX' ? 'MAX' : parseInt(btnModeRaw, 10);
+        
+        if (btnMode !== mode) return;
+        
+        btn.classList.add('active');
+        
+        if (mode === 1) {
+            toggleSlider.style.opacity = '0';
+            return;
+        }
 
-document.querySelectorAll('.buy-toggle-btn').forEach((btn, index) => {
+        toggleSlider.style.transform = `translateX(${index * 100}%)`;
+    });
+    
+    updatePanel();
+}
+
+// Event Listener: Mobile Toggle Button (Rotiert durch 1 -> 10 -> 100 -> MAX)
+const mobileBuyToggle = document.getElementById('mobile-buy-toggle');
+if (mobileBuyToggle) {
+    mobileBuyToggle.addEventListener('click', () => {
+        if (currentBuyMode === 1) {
+            setBuyMode(10);
+            return;
+        }
+        if (currentBuyMode === 10) {
+            setBuyMode(100);
+            return;
+        }
+        if (currentBuyMode === 100) {
+            setBuyMode('MAX');
+            return;
+        }
+        setBuyMode(1);
+    });
+}
+
+// Event Listener: Desktop Buttons
+document.querySelectorAll('.buy-toggle-btn').forEach((btn) => {
     btn.addEventListener('click', (e) => {
         const target = e.target;
-        const mode = target.getAttribute('data-mode');
+        const modeRaw = target.getAttribute('data-mode');
+        const mode = modeRaw === 'MAX' ? 'MAX' : parseInt(modeRaw, 10);
         
         if (target.classList.contains('active')) {
-            target.classList.remove('active');
-            currentBuyMode = 1;
-            if (toggleSlider) toggleSlider.style.opacity = '0';
-            updatePanel();
+            setBuyMode(1);
             return;
         }
         
-        document.querySelectorAll('.buy-toggle-btn').forEach(b => b.classList.remove('active'));
-        target.classList.add('active');
-        
-        if (toggleSlider) {
-            toggleSlider.style.opacity = '1';
-            toggleSlider.style.transform = `translateX(${index * 100}%)`;
-        }
-        
-        currentBuyMode = mode === 'MAX' ? 'MAX' : parseInt(mode, 10);
-        updatePanel();
+        setBuyMode(mode);
     });
 });
 

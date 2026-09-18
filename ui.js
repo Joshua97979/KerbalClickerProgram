@@ -350,6 +350,8 @@ function updatePanel() {
 	
     if (!planet.unlocked) {
         document.getElementById('buy-toggle-container').classList.add('hidden');
+		const mobileToggle = document.getElementById('mobile-buy-toggle');
+		if (mobileToggle) mobileToggle.classList.add('hidden');
         document.getElementById('unlock-section').classList.remove('hidden');
         document.getElementById('economy-section').classList.add('hidden');
 
@@ -453,11 +455,15 @@ function updatePanel() {
 	
     if (pId === 'kerbol') {
         document.getElementById('buy-toggle-container').classList.add('hidden');
+		const mobileToggle = document.getElementById('mobile-buy-toggle');
+		if (mobileToggle) mobileToggle.classList.add('hidden');
         document.getElementById('economy-section').classList.add('hidden');
         return; 
     }
 
     document.getElementById('buy-toggle-container').classList.remove('hidden');
+	const mobileToggle = document.getElementById('mobile-buy-toggle');
+	if (mobileToggle) mobileToggle.classList.remove('hidden');
     document.getElementById('economy-section').classList.remove('hidden');
 
 	Object.values(unitDOMMapping).forEach(mapping => {
