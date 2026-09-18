@@ -148,16 +148,22 @@ function generateUnitCards() {
 
         if (unitData.isRocket) {
             html += `
-            <div class="action-card" id="${cardId}">
+            <div class="action-card unit-card" id="${cardId}">
                 <div id="launchpad-label">LAUNCHPAD - MANUAL CONTROL</div>
                 <div id="rocket-content">
-                    <h3>${title}</h3>
-                    <div class="stat-grid">
-                        <span>Boosters:</span> <span class="stat-val"><span id="${prefix}-owned">0</span></span>
-                        <span>Click Value:</span> <span class="stat-val text-green">+<span id="${prefix}-power">1</span> ${ICON_FUNDS}</span>
+                    <div class="action-card-body">
+                        <div class="action-card-text">
+                            <h3>${title}</h3>
+                            <div class="stat-grid">
+                                <span>Boosters:</span> <span class="stat-val"><span id="${prefix}-owned">0</span></span>
+                                <span>Click Value:</span> <span class="stat-val text-green">+<span id="${prefix}-power">1</span> ${ICON_FUNDS}</span>
+                            </div>
+                        </div>
+                        <div class="action-card-actions">
+                            <button id="btn-click" class="ksp-button">Manual Launch!</button>
+                            <button id="btn-buy-${prefix}" class="ksp-button btn-green"><span class="btn-text-base">${btnText}</span> <span class="btn-text-cost">(<span id="${prefix}-cost">10</span> ${ICON_FUNDS})</span></button>
+                        </div>
                     </div>
-                    <button id="btn-click" class="ksp-button">Manual Launch!</button>
-                    <button id="btn-buy-${prefix}" class="ksp-button btn-green">${btnText} (<span id="${prefix}-cost">10</span> ${ICON_FUNDS})</button>
                 </div>
             </div>`;
             continue;
@@ -169,14 +175,20 @@ function generateUnitCards() {
         const btnClass = isScience ? 'btn-blue' : 'btn-green';
 
         html += `
-        <div class="action-card" id="${cardId}">
-            <h3>${title}</h3>
-            <div class="stat-grid">
-                <span>Owned:</span> <span class="stat-val"><span id="${prefix}-owned">0</span></span>
-                <span>Yield/Ea:</span> <span class="stat-val">+<span id="${prefix}-single">0</span> ${icon}/s</span>
-                <span>Total:</span> <span class="stat-val ${textColor}">+<span id="${prefix}-power">0</span> ${icon}/s</span>
+        <div class="action-card unit-card" id="${cardId}">
+            <div class="action-card-body">
+                <div class="action-card-text">
+                    <h3>${title}</h3>
+                    <div class="stat-grid">
+                        <span>Owned:</span> <span class="stat-val"><span id="${prefix}-owned">0</span></span>
+                        <span>Yield/Ea:</span> <span class="stat-val">+<span id="${prefix}-single">0</span> ${icon}/s</span>
+                        <span>Total:</span> <span class="stat-val ${textColor}">+<span id="${prefix}-power">0</span> ${icon}/s</span>
+                    </div>
+                </div>
+                <div class="action-card-actions">
+                    <button id="btn-buy-${prefix}" class="ksp-button ${btnClass}"><span class="btn-text-base">${btnText}</span> <span class="btn-text-cost">(<span id="${prefix}-cost">0</span> ${icon})</span></button>
+                </div>
             </div>
-            <button id="btn-buy-${prefix}" class="ksp-button ${btnClass}">${btnText} (<span id="${prefix}-cost">0</span> ${icon})</button>
         </div>`;
     }
 
@@ -291,11 +303,10 @@ function refreshButtonStates() {
         if (unit.owned >= unit.max) {
             updateButtonState(btnId, Infinity);
             const btn = document.getElementById(btnId);
-            if (btn) {
-                if (unitKey === 'rocket') btn.innerHTML = 'Max Parts Reached!';
-                else btn.innerHTML = 'Max Reached!';
-            }
-            continue;
+			if (!btn) continue;
+			
+            let baseText = unitKey === 'rocket' ? 'Add Moar Boosters!' : 'Build';
+			btn.innerHTML = `<span class="btn-text-base">${baseText}</span> <span class="btn-text-cost">(<span id="${mapping.prefix}-cost">${formatNumber(cost)}</span> ${ICON_FUNDS})</span>`;
         }
 
         let cost = 0;
@@ -498,7 +509,7 @@ function updatePanel() {
                 continue;
             }
             
-            btn.innerHTML = `Add Moar Boosters! (<span id="${prefix}-cost">${formatNumber(cost)}</span> ${ICON_FUNDS})`;
+            btn.innerHTML = `<span class="btn-text-base">Add Moar Boosters!</span> <span class="btn-text-cost">(<span id="${prefix}-cost">${formatNumber(cost)}</span> ${ICON_FUNDS})</span>`;
             updateButtonState(`btn-buy-${prefix}`, cost);
             continue;
         }
@@ -523,7 +534,7 @@ function updatePanel() {
             continue;
         }
 
-        btn.innerHTML = `Build (<span id="${prefix}-cost">${formatNumber(cost)}</span> ${ICON_FUNDS})`;
+        btn.innerHTML = `<span class="btn-text-base">Build</span> <span class="btn-text-cost">(<span id="${prefix}-cost">${formatNumber(cost)}</span> ${ICON_FUNDS})</span>`;
         updateButtonState(`btn-buy-${prefix}`, cost);
     }
 }

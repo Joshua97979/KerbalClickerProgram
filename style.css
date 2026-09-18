@@ -973,7 +973,7 @@ h2 { padding-bottom: 10px; margin-bottom: 10px; }
 	color: #888 !important;
 	cursor: not-allowed !important;
 	opacity: 0.7;
-	border: 2px solid #555;
+	border: 2px solid #555 !important;
 }
 
 .panel-header-nav {
@@ -1685,6 +1685,7 @@ h2 { padding-bottom: 10px; margin-bottom: 10px; }
 /* =========================================
    Mobile UI & Responsive Design (Portrait)
    ========================================= */
+
 .hidden-desktop {
 	display: none !important;
 }
@@ -1792,6 +1793,49 @@ h2 { padding-bottom: 10px; margin-bottom: 10px; }
 	border-top: 0px;
 	z-index: 20;
 	background: rgba(0, 0, 0, 0.8);
+	font-size: 0.85rem;
+}
+
+/* Panel-Titel (z.B. "Kerbin" oder "Mission Control") verkleinern */
+.is-mobile #leftPanel-title {
+	display: none;
+}
+
+/* Action-Cards kompakter machen */
+.is-mobile .action-card {
+	padding: 10px; 
+	font-size: 0.95rem; 
+	margin-bottom: 8px;
+}
+
+/* Das Stat-Grid (Boosters, Click Value etc.) verkleinern */
+.is-mobile .stat-grid {
+	font-size: 0.75rem; 
+	gap: 4px 8px; /* Etwas enger zusammenrücken */
+	margin: 6px 0 0 0;
+}
+
+/* Alle KSP-Buttons (Manual Launch, Moar Boosters) skalieren */
+.is-mobile .ksp-button {
+	font-size: 0.8rem; 
+	padding: 8px; /* Padding reduzieren, damit der Button schmaler wird */
+	margin-top: 8px;
+}
+
+/* Raketen-Montage Titel anpassen */
+.is-mobile .rocket-assembly-title {
+	font-size: 0.85rem; 
+}
+
+/* Upgrade-Buttons im R&D / Raketen-Menü speziell auf Mobile stark verkleinern */
+.is-mobile .btn-upgrade {
+	font-size: 0.7rem; 
+}
+
+/* Die x10, x100, MAX Buttons in der Navigationsleiste verkleinern */
+.is-mobile .buy-toggle-btn {
+	font-size: 0.8rem; 
+	padding: 8px 0;
 }
 
 /* Steuert die Sichtbarkeit über die Tabs */
@@ -1890,4 +1934,95 @@ h2 { padding-bottom: 10px; margin-bottom: 10px; }
 	
 .is-mobile #game-container:has(#action-panel:not(.hidden)) #map-controls {
 	right: 10px;
+}
+
+.is-mobile .nav-arrow {
+	font-size: 1.3rem;
+}
+
+.is-mobile .panel-header-nav {
+	border-bottom: none;
+	padding-bottom: 0px;
+}
+
+.is-mobile .action-card.unit-card {
+    padding: 0; 
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Schneidet die rechten Button-Ecken ab, passend zum Rahmen */
+}
+
+/* Das Rocket-Card Layout nutzt einen eigenen inneren Container */
+.is-mobile #rocket-content {
+    padding: 0;
+}
+
+.is-mobile .action-card-body {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch; /* Zieht die Buttons auf die volle Höhe */
+    width: 100%;
+    flex: 1; 
+}
+
+.is-mobile .action-card-text {
+    flex: 1;
+    padding: 10px; /* Altes action-card Padding für den Text wiederherstellen */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Container für die Buttons auf der rechten Seite */
+.is-mobile .action-card-actions {
+    display: flex;
+    /* row-reverse platziert den im HTML zuerst genannten Button (Launch) nach rechts! */
+    flex-direction: row-reverse; 
+    align-items: stretch;
+	width: 95px;
+}
+
+/* Mehr Platz für die zwei Buttons auf der Raketen-Karte */
+.is-mobile #rocket-card .action-card-actions {
+	width: 190px;
+}
+
+.is-mobile .action-card-actions > .ksp-button {
+    margin: 0;
+    width: auto;
+    flex: 1;
+    border-radius: 0;
+    border-top: none;
+    border-bottom: none;
+    border-right: none;
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    flex-direction: column;
+    white-space: normal; /* Erlaubt mehrzeiligen Text (z.B. für Kostenumbrüche) */
+    line-height: 1.2;
+    padding: 5px;
+}
+
+.is-mobile .action-card h3 {
+	font-size: 0.9rem;
+}
+
+.is-mobile .action-card-actions > .ksp-button {
+    border-left: 2px solid #555;
+}
+
+/* Dynamische linke Rahmenfarbe, je nach Button-Typ */
+.is-mobile .action-card-actions > .btn-green {
+    border-left: 2px solid var(--ksp-green);
+}
+
+.is-mobile .action-card-actions > .btn-blue {
+    border-left: 2px solid var(--ksp-blue);
+}
+
+.is-mobile .action-card-actions > .btn-orange {
+    border-left: 2px solid var(--ksp-orange);
 }
