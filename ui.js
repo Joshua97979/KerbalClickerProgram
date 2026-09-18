@@ -266,10 +266,10 @@ function refreshButtonStates() {
     const pId = gameData.selectedPlanet;
     if (!pId) return;
 
-	if (typeof updateRocketUpgradesUI === 'function') {
+    if (typeof updateRocketUpgradesUI === 'function') {
         updateRocketUpgradesUI();
-    }				
-	
+    }
+
     const planet = gameData.planets[pId];
     if (!planet) return;
 
@@ -292,47 +292,50 @@ function refreshButtonStates() {
         }
     }
 
-    if (pId === 'kerbol') return; 
+    if (pId === 'kerbol') return;
 
     for (const [unitKey, mapping] of Object.entries(unitDOMMapping)) {
         if (!planet.units[unitKey]) continue;
-        
+
         const btnId = `btn-buy-${mapping.prefix}`;
         const unit = planet.units[unitKey];
-        
+        const btn = document.getElementById(btnId);
+
+        if (!btn) continue;
+
         if (unit.owned >= unit.max) {
             updateButtonState(btnId, Infinity);
-            const btn = document.getElementById(btnId);
-			if (!btn) continue;
-			
-            let baseText = unitKey === 'rocket' ? 'Add Moar Boosters!' : 'Build';
-			btn.innerHTML = `<span class="btn-text-base">${baseText}</span> <span class="btn-text-cost">(<span id="${mapping.prefix}-cost">${formatNumber(cost)}</span> ${ICON_FUNDS})</span>`;
+			let baseText = "";
+			if (unitKey === 'rocket') {
+				baseText = "Max Parts Reached!";
+			} else {
+				baseText = "Max Reached!";
+			}
+			btn.innerHTML = `<span class="btn-text-base">${baseText}</span>`;
+            continue;
         }
 
         let cost = 0;
         let buyAmount = currentBuyMode;
-        
+
         if (currentBuyMode === 'MAX') {
             const maxInfo = getMaxAffordable(pId, unitKey);
             buyAmount = maxInfo.amount;
             cost = maxInfo.cost;
-            
+
             if (buyAmount === 0) {
                 buyAmount = 1;
                 cost = getCost(pId, unitKey, 1);
             }
-            
-            const btn = document.getElementById(btnId);
-            if (btn) {
-                let baseText = unitKey === 'rocket' ? 'Add Moar Boosters!' : 'Build';
-                btn.innerHTML = `${baseText} (<span id="${mapping.prefix}-cost">${formatNumber(cost)}</span> ${ICON_FUNDS})`;
-            }
+
+            let baseText = unitKey === 'rocket' ? 'Add Moar Boosters!' : 'Build';
+            btn.innerHTML = `${baseText} (<span id="${mapping.prefix}-cost">${formatNumber(cost)}</span> ${ICON_FUNDS})`;
         } else {
             buyAmount = Math.min(currentBuyMode, Math.max(0, unit.max - unit.owned));
             if (buyAmount === 0) buyAmount = 1;
             cost = getCost(pId, unitKey, buyAmount);
         }
-        
+
         updateButtonState(btnId, cost);
     }
 }
