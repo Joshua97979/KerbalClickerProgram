@@ -936,6 +936,10 @@ let clickHoldInterval = null;
 
 function startClickHold(e) {
     if (e && e.cancelable) e.preventDefault(); // Verhindert z. B. doppelte Klicks auf mobilen Geräten
+	
+	const btn = document.getElementById('btn-click');
+	if (btn) btn.classList.add('active');
+	
     manualClick();
     
     if (clickHoldInterval) return;
@@ -943,6 +947,9 @@ function startClickHold(e) {
 }
 
 function stopClickHold() {
+	const btn = document.getElementById('btn-click');
+    if (btn) btn.classList.remove('active');
+	
     if (!clickHoldInterval) return;
     
     clearInterval(clickHoldInterval);
