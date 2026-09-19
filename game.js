@@ -935,8 +935,6 @@ if (typeof generateUnitCards === 'function') {
 let clickHoldInterval = null;
 
 function startClickHold(e) {
-    if (e && e.cancelable) e.preventDefault(); // Verhindert z. B. doppelte Klicks auf mobilen Geräten
-	
 	const btn = document.getElementById('btn-click');
 	if (btn) btn.classList.add('active');
 	
@@ -959,7 +957,11 @@ function stopClickHold() {
 const btnClick = document.getElementById('btn-click');
 if (btnClick) {
     btnClick.addEventListener('mousedown', startClickHold);
-    btnClick.addEventListener('touchstart', startClickHold, { passive: false });
+    // passive: true, da wir das Event nicht mehr mit preventDefault() abbrechen. (verbessert Scroll-Performance)
+    btnClick.addEventListener('touchstart', startClickHold, { passive: true });
+	
+	// NEU: Bricht das Halten ab, wenn der Spieler anfängt über den Button zu wischen/scrollen
+    btnClick.addEventListener('touchmove', stopClickHold, { passive: true });
     
     btnClick.addEventListener('mouseup', stopClickHold);
     btnClick.addEventListener('mouseleave', stopClickHold);

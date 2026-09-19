@@ -550,9 +550,14 @@ function updatePanel() {
 
 function checkContracts() {
     const container = document.getElementById('missions-container');
+    const mobileIndicator = document.getElementById('mobile-mission-indicator');
+
     if (!container) return;
 
+    // Wenn alle Verträge abgeschlossen sind: Indikator ausblenden und abbrechen
     if (gameData.claimedContracts.length >= contracts.length) {
+        if (mobileIndicator) mobileIndicator.classList.add('hidden');
+        
         if (container.dataset.finished) return; 
         container.innerHTML = `
             <div style="margin-top: 10px;">
@@ -620,6 +625,19 @@ function checkContracts() {
         card.querySelector('.mission-progress-bar').style.width = `${progressPercent}%`;
         card.querySelector('.mission-progress-text').innerText = `${formatNumber(currentVal)}/${formatNumber(contract.target)}`;
     });
+
+    // --- NEU: Indikator-Logik für Mobile-Sicht ---
+    if (!mobileIndicator) return;
+
+    // Prüft, ob es Verträge gibt, die fertig, aber noch nicht eingesammelt sind
+    const hasClaimable = gameData.completedContracts.some(id => !gameData.claimedContracts.includes(id));
+    
+    if (hasClaimable) {
+        mobileIndicator.classList.remove('hidden');
+        return;
+    }
+    
+    mobileIndicator.classList.add('hidden');
 }
 
 function updateRndIndicator() {
