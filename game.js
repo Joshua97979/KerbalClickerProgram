@@ -1591,7 +1591,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	initLabelsSetting();
 	updateHeader();
 
-	if (!gameData.selectedPlanet) gameData.selectedPlanet = 'kerbol';
+	if (!gameData.selectedPlanet) gameData.selectedPlanet = 'kerbin';
 	cameraTarget = gameData.selectedPlanet;
 	
 	updateMapDimensions();
