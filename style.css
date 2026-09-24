@@ -834,6 +834,25 @@ h2 { padding-bottom: 10px; margin-bottom: 10px; }
 }
 .modal-header h2 { margin: 0; padding: 0; border-bottom: none; }
 
+#rnd-modal-content {
+	padding: 0px;
+}
+
+#rnd-modal-header{
+	padding-top: 30px;
+	padding-left: 30px;
+	padding-right: 30px;
+	margin-bottom: 0px;
+	border-bottom: none;
+}
+
+#rnd-modal-p {
+	padding-left: 30px;
+	padding-right: 30px;
+	padding-bottom: 10px;
+	border-bottom: 2px solid var(--ksp-blue);
+}
+
 .close-btn { background: transparent; color: var(--text-main); border: none; font-size: 1.5rem; cursor: pointer; }
 .close-btn:hover { color: #e74c3c; }
 
